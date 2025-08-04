@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
 import Session from '@/models/Session';
+import Administrator from '@/models/Administrator';
 
 // Helper function to get client IP and device info
 function getClientInfo(req: any) {
@@ -186,10 +187,25 @@ const handler = NextAuth({
     async session({ session }) {
       if (session.user?.email) {
         await connectDB();
+        
+        // Check if user is an administrator
+        const admin = await Administrator.findOne({ email: session.user.email, isActive: true });
+        if (admin) {
+          session.user.id = admin._id.toString();
+          session.user.role = 'admin';
+          session.user.name = admin.name;
+          session.user.image = session.user.image;
+          // Update last login
+          admin.lastLogin = new Date();
+          await admin.save();
+          return session;
+        }
+        
+        // Regular user
         const user = await User.findOne({ email: session.user.email });
         if (user) {
           session.user.id = user._id.toString();
-          session.user.role = user.role;
+          session.user.role = user.role || 'user';
           session.user.rating = user.rating;
           session.user.battlesWon = user.battlesWon;
           session.user.battlesLost = user.battlesLost;

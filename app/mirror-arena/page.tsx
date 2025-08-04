@@ -1,15 +1,48 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Users, Timer, Trophy, Eye, Zap } from 'lucide-react';
-import BattleView from '../../components/BattleView';
-import { CodeEditor } from '../../components/CodeEditor';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Timer, Trophy, Eye, Zap, Play, Code, Crown, Target } from 'lucide-react';
+import { CodeExecutor } from '@/components/CodeExecutor';
+import { useSession } from 'next-auth/react';
 
-// Mock data - replace with real data from your backend
-const mockProblem = {
+interface Player {
+  id: string;
+  username: string;
+  avatar: string;
+  language: 'javascript' | 'python' | 'java' | 'cpp';
+  testsPassed: number;
+  totalTests: number;
+  accuracy: number;
+  wpm: number;
+  status: 'coding' | 'testing' | 'finished';
+  rank: number;
+  progress: number;
+}
+
+interface BattleProblem {
+  id: string;
+  title: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  description: string;
+  examples: Array<{
+    input: string;
+    output: string;
+    explanation: string;
+  }>;
+  timeLimit: number;
+  starterCode: {
+    javascript: string;
+    python: string;
+    java: string;
+    cpp: string;
+  };
+}
+
+const mockProblem: BattleProblem = {
+  id: 'two-sum-advanced',
   title: "Two Sum Problem",
-  difficulty: "Medium" as const,
+  difficulty: "medium",
   description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
   examples: [
     {
@@ -18,68 +51,65 @@ const mockProblem = {
       explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]."
     }
   ],
-  testCases: [
-    { input: "[2,7,11,15], 9", output: "[0,1]" },
-    { input: "[3,2,4], 6", output: "[1,2]" },
-    { input: "[3,3], 6", output: "[0,1]" }
-  ]
+  timeLimit: 1800, // 30 minutes
+  starterCode: {
+    javascript: `function twoSum(nums, target) {
+    // Your solution here
+    
+}`,
+    python: `def two_sum(nums, target):
+    # Your solution here
+    pass`,
+    java: `public int[] twoSum(int[] nums, int target) {
+    // Your solution here
+    
+}`,
+    cpp: `vector<int> twoSum(vector<int>& nums, int target) {
+    // Your solution here
+    
+}`
+  }
 };
 
 const MirrorArenaPage = () => {
+  const { data: session } = useSession();
   const [gamePhase, setGamePhase] = useState<'waiting' | 'battle' | 'finished'>('waiting');
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
-  const [spectatorCount, setSpectatorCount] = useState(23);
-  const [revealPercentage, setRevealPercentage] = useState(20);
+  const [timeLeft, setTimeLeft] = useState(mockProblem.timeLimit);
+  const [spectatorCount, setSpectatorCount] = useState(156);
+  const [revealPercentage, setRevealPercentage] = useState(25);
   const [isSpectator, setIsSpectator] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<'javascript' | 'python' | 'java' | 'cpp'>('javascript');
   
-  const [players, setPlayers] = useState([
+  const [players] = useState<Player[]>([
     {
       id: 'player1',
-      username: 'PytonMaster',
-      avatar: '/api/placeholder/32/32',
-      language: 'python' as const,
-      code: `def two_sum(nums, target):
-    # Your solution here
-    for i in range(len(nums)):
-        for j in range(i + 1, len(nums)):
-            if nums[i] + nums[j] == target:
-                return [i, j]
-    return []`,
-      testsPassed: 2,
-      totalTests: 3,
-      accuracy: 67,
-      isReady: true,
-      isWinner: false,
+      username: 'PythonMaster',
+      avatar: '🐍',
+      language: 'python',
+      testsPassed: 3,
+      totalTests: 4,
+      accuracy: 75,
+      wpm: 87,
+      status: 'coding',
+      rank: 1,
+      progress: 85
     },
     {
       id: 'player2',
       username: 'CppCoder',
-      avatar: '/api/placeholder/32/32',
-      language: 'cpp' as const,
-      code: `#include <vector>
-#include <unordered_map>
-using namespace std;
-
-vector<int> twoSum(vector<int>& nums, int target) {
-    unordered_map<int, int> map;
-    for (int i = 0; i < nums.size(); i++) {
-        int complement = target - nums[i];
-        if (map.find(complement) != map.end()) {
-            return {map[complement], i};
-        }
-        map[nums[i]] = i;
-    }
-    return {};
-}`,
-      testsPassed: 3,
-      totalTests: 3,
+      avatar: '⚡',
+      language: 'cpp',
+      testsPassed: 4,
+      totalTests: 4,
       accuracy: 100,
-      isReady: true,
-      isWinner: false,
+      wpm: 92,
+      status: 'finished',
+      rank: 2,
+      progress: 100
     }
   ]);
 
-  // Timer countdown
+  // Timer effect
   useEffect(() => {
     if (gamePhase === 'battle' && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -95,232 +125,341 @@ vector<int> twoSum(vector<int>& nums, int target) {
     }
   }, [gamePhase, timeLeft]);
 
-  // Mock spectator count updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSpectatorCount(prev => prev + Math.floor(Math.random() * 3) - 1);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleStartBattle = () => {
-    setGamePhase('battle');
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleJoinAsSpectator = () => {
-    setIsSpectator(true);
-  };
-
-  const handleCodeChange = (playerId: string, code: string) => {
-    setPlayers(prev => prev.map(p => 
-      p.id === playerId ? { ...p, code } : p
-    ));
-  };
-
-  const handleRunCode = (playerId: string) => {
-    // Mock code execution
-    const player = players.find(p => p.id === playerId);
-    if (player) {
-      // Simulate test results
-      const passed = Math.floor(Math.random() * 3) + 1;
-      setPlayers(prev => prev.map(p => 
-        p.id === playerId ? { 
-          ...p, 
-          testsPassed: passed,
-          accuracy: Math.round((passed / 3) * 100)
-        } : p
-      ));
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'text-green-400';
+      case 'medium': return 'text-yellow-400';
+      case 'hard': return 'text-red-400';
+      default: return 'text-gray-400';
     }
   };
 
-  const handlePeekToggle = (playerId: string) => {
-    setRevealPercentage(prev => prev === 20 ? 100 : 20);
+  const getLanguageColor = (language: string) => {
+    switch (language) {
+      case 'python': return 'bg-green-500';
+      case 'javascript': return 'bg-yellow-500';
+      case 'java': return 'bg-orange-500';
+      case 'cpp': return 'bg-blue-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const joinBattle = () => {
+    setGamePhase('battle');
+    setIsSpectator(false);
+  };
+
+  const spectate = () => {
+    setIsSpectator(true);
+    setGamePhase('battle');
   };
 
   if (gamePhase === 'waiting') {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        {/* Header */}
-        <div className="bg-gray-800 border-b border-gray-700 p-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+            >
+              Mirror Arena: Live Battle
+            </motion.h1>
+            <p className="text-xl text-gray-300">
+              Code side by side with other developers in real-time
+            </p>
+          </div>
+
+          {/* Battle Info */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="max-w-4xl mx-auto bg-gray-800 rounded-xl border border-gray-700 p-8 mb-8"
+          >
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold mb-2">🪞 Mirror Arena</h1>
-                <p className="text-gray-400">Real-time code battles with dual language support</p>
+                <h2 className="text-2xl font-bold text-white mb-2">{mockProblem.title}</h2>
+                <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(mockProblem.difficulty)} bg-opacity-20 border`}>
+                  {mockProblem.difficulty.toUpperCase()}
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Users size={16} />
+              <div className="flex items-center gap-4 text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Timer size={20} />
+                  <span>{formatTime(mockProblem.timeLimit)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users size={20} />
+                  <span>{players.length} players</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Eye size={20} />
                   <span>{spectatorCount} watching</span>
                 </div>
+              </div>
+            </div>
+
+            <p className="text-gray-300 mb-6">{mockProblem.description}</p>
+
+            {/* Examples */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">Examples</h3>
+              {mockProblem.examples.map((example, index) => (
+                <div key={index} className="bg-gray-900 rounded-lg p-4 mb-3 border border-gray-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-400 mb-1">Input:</div>
+                      <div className="text-green-400 font-mono text-sm">{example.input}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400 mb-1">Output:</div>
+                      <div className="text-blue-400 font-mono text-sm">{example.output}</div>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-sm text-gray-400 mb-1">Explanation:</div>
+                    <div className="text-gray-300 text-sm">{example.explanation}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Current Players */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">Current Players</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {players.map((player) => (
+                  <div key={player.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">{player.avatar}</div>
+                        <div>
+                          <div className="font-medium text-white">{player.username}</div>
+                          <div className={`text-xs px-2 py-1 rounded ${getLanguageColor(player.language)} text-white`}>
+                            {player.language.toUpperCase()}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-400">Ready</div>
+                        <div className="text-green-400">✓</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={joinBattle}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-colors"
+              >
+                <Play size={20} />
+                Join Battle
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={spectate}
+                className="flex items-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+              >
+                <Eye size={20} />
+                Spectate ({spectatorCount})
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gamePhase === 'battle') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+        {/* Battle Header */}
+        <div className="bg-gray-800 border-b border-gray-700 p-4">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold">{mockProblem.title}</h1>
+              <div className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(mockProblem.difficulty)} bg-opacity-20 border`}>
+                {mockProblem.difficulty.toUpperCase()}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-red-400">
+                <Timer size={20} />
+                <span className="font-mono text-lg">{formatTime(timeLeft)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <Eye size={16} />
+                <span>{spectatorCount}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Problem Statement */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-gray-800 border border-gray-700 rounded-lg p-6"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <Trophy className="text-yellow-400" size={24} />
-                <h2 className="text-xl font-bold">Today&apos;s Challenge</h2>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold">{mockProblem.title}</h3>
-                    <span className="px-2 py-1 bg-yellow-600 text-black rounded text-xs font-semibold">
-                      {mockProblem.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-gray-300">{mockProblem.description}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Example:</h4>
-                  <div className="bg-gray-900 border border-gray-600 rounded p-3 font-mono text-sm">
-                    <div className="text-green-400">Input: {mockProblem.examples[0].input}</div>
-                    <div className="text-blue-400">Output: {mockProblem.examples[0].output}</div>
-                    <div className="text-gray-400 mt-1">{mockProblem.examples[0].explanation}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Test Cases:</h4>
-                  <div className="space-y-2">
-                    {mockProblem.testCases.map((test, index) => (
-                      <div key={index} className="bg-gray-900 border border-gray-600 rounded p-2 font-mono text-xs">
-                        <span className="text-green-400">Input: {test.input}</span>
-                        <span className="text-blue-400 ml-4">Expected: {test.output}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Join Options */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-6"
-            >
-              {/* Battle Mode Selection */}
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">Join the Battle</h2>
+        <div className="flex h-[calc(100vh-80px)]">
+          {/* Left Sidebar - Problem & Leaderboard */}
+          <div className="w-80 bg-gray-900 border-r border-gray-700 overflow-y-auto">
+            <div className="p-4">
+              {/* Problem Description */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">Problem</h3>
+                <p className="text-gray-300 text-sm mb-4">{mockProblem.description}</p>
                 
-                <div className="space-y-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleStartBattle}
-                    className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-all"
-                  >
-                    🥋 Join as Coder
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleJoinAsSpectator}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-all"
-                  >
-                    👀 Watch as Spectator
-                  </motion.button>
-                </div>
-
-                <div className="mt-6 text-sm text-gray-400">
-                  <h3 className="font-semibold mb-2">Battle Rules:</h3>
-                  <ul className="space-y-1">
-                    <li>• 10-minute time limit</li>
-                    <li>• Choose Python or C++</li>
-                    <li>• Real-time code visibility</li>
-                    <li>• Spectators can peek with limitations</li>
-                    <li>• Winner determined by test cases passed + speed</li>
-                  </ul>
-                </div>
+                {mockProblem.examples.map((example, index) => (
+                  <div key={index} className="bg-gray-800 rounded p-3 mb-3 text-xs">
+                    <div className="text-gray-400">Input:</div>
+                    <div className="text-green-400 font-mono mb-2">{example.input}</div>
+                    <div className="text-gray-400">Output:</div>
+                    <div className="text-blue-400 font-mono">{example.output}</div>
+                  </div>
+                ))}
               </div>
 
-              {/* Current Players */}
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                <h3 className="text-lg font-bold mb-4">Current Fighters</h3>
+              {/* Live Leaderboard */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Trophy size={20} className="text-yellow-400" />
+                  Live Rankings
+                </h3>
                 <div className="space-y-3">
                   {players.map((player, index) => (
-                    <div key={player.id} className="flex items-center justify-between bg-gray-900 rounded-lg p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                          {player.username[0]}
+                    <motion.div
+                      key={player.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="bg-gray-800 rounded-lg p-3 border border-gray-700"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {index === 0 && <Crown size={16} className="text-yellow-400" />}
+                          <span className="text-lg">{player.avatar}</span>
+                          <span className="font-medium text-sm">{player.username}</span>
                         </div>
-                        <div>
-                          <div className="font-semibold">{player.username}</div>
-                          <div className="text-xs text-gray-400 uppercase">{player.language}</div>
+                        <div className={`text-xs px-2 py-1 rounded ${getLanguageColor(player.language)} text-white`}>
+                          {player.language}
                         </div>
                       </div>
-                      <div className="text-green-400 text-sm">Ready</div>
+                      
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Tests:</span>
+                          <span className="text-green-400">{player.testsPassed}/{player.totalTests}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Accuracy:</span>
+                          <span className="text-blue-400">{player.accuracy}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">WPM:</span>
+                          <span className="text-purple-400">{player.wpm}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="mt-2">
+                        <div className="bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${player.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Code Area */}
+          <div className="flex-1 flex flex-col">
+            {!isSpectator ? (
+              <div className="h-full p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value as typeof selectedLanguage)}
+                    className="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                  </select>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <span>Your rank: #1</span>
+                    <span>Tests passed: 2/4</span>
+                  </div>
+                </div>
+                
+                <CodeExecutor
+                  initialCode={mockProblem.starterCode[selectedLanguage]}
+                  language={selectedLanguage}
+                  context="battle"
+                  height="calc(100vh - 200px)"
+                />
+              </div>
+            ) : (
+              <div className="h-full p-4">
+                <div className="text-center mb-4">
+                  <h3 className="text-lg font-semibold">Spectator Mode</h3>
+                  <p className="text-gray-400">Watch players code in real-time</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                  {players.map((player) => (
+                    <div key={player.id} className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                      <div className="bg-gray-700 p-3 border-b border-gray-600">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{player.avatar}</span>
+                            <span className="font-medium">{player.username}</span>
+                          </div>
+                          <div className={`text-xs px-2 py-1 rounded ${getLanguageColor(player.language)} text-white`}>
+                            {player.language}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 h-64 overflow-hidden">
+                        <div className="bg-gray-900 rounded p-3 h-full relative">
+                          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                            <div className="text-center">
+                              <Eye size={24} className="mx-auto mb-2 text-gray-500" />
+                              <div className="text-sm text-gray-500">Limited view ({revealPercentage}%)</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Spectator Features */}
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Eye className="text-purple-400" />
-                  Spectator Features
-                </h3>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span>Peek at code with 20% visibility</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span>Real-time test case results</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span>Live chat with other spectators</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span>Vote for coding style points</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-900">
-      <BattleView
-        mode="mirror"
-        players={players}
-        currentPlayer={isSpectator ? undefined : 'player1'}
-        timeLeft={timeLeft}
-        totalTime={600}
-        phase={gamePhase}
-        spectatorCount={spectatorCount}
-        problemTitle={mockProblem.title}
-        problemDifficulty={mockProblem.difficulty}
-        revealPercentage={revealPercentage}
-        isSpectator={isSpectator}
-        onCodeChange={handleCodeChange}
-        onRunCode={handleRunCode}
-        onPeekToggle={handlePeekToggle}
-      />
-    </div>
-  );
+  return null;
 };
 
 export default MirrorArenaPage;

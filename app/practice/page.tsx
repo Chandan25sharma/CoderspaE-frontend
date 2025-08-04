@@ -172,15 +172,15 @@ export default function PracticePage() {
 
   if (selectedChallenge) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyber-dark via-purple-900 to-cyber-dark">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="flex h-screen">
           {/* Left Panel - Problem Description */}
-          <div className="w-1/3 bg-cyber-gray border-r border-gray-700 overflow-y-auto">
+          <div className="w-1/3 bg-gray-900 border-r border-gray-700 overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={() => setSelectedChallenge(null)}
-                  className="text-neon-blue hover:text-blue-400 transition-colors"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   ← Back to Challenges
                 </button>
