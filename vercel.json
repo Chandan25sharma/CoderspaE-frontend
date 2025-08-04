@@ -5,15 +5,15 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "MONGODB_URI": "@mongodb_uri",
-    "GOOGLE_CLIENT_ID": "@google_client_id",
-    "GOOGLE_CLIENT_SECRET": "@google_client_secret",
-    "GITHUB_CLIENT_ID": "@github_client_id",
-    "GITHUB_CLIENT_SECRET": "@github_client_secret",
-    "NEXT_PUBLIC_STRIPE_PUBLIC_KEY": "@stripe_public_key",
-    "STRIPE_SECRET_KEY": "@stripe_secret_key"
+    "NEXTAUTH_URL": "http://localhost:3000",
+    "NEXTAUTH_SECRET": "ab16fd32cd407146fbf764c67d58a013",
+    "MONGODB_URI": "mongodb+srv://coderspae-user:yWgCu64U3kBN1rcm@alunguai.jplvz2e.mongodb.net/?retryWrites=true&w=majority&appName=AlunguAi",
+    "GOOGLE_CLIENT_ID": "1063576302817-ej0s0uttktijevteu8niroabbssm0fin.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "GITHUB_CLIENT_ID": "Ov23liGzEA91RgJcUcEW",
+    "GITHUB_CLIENT_SECRET": "5143ff05bdffb16876528fc080b4f588391d6856",
+    "NEXT_PUBLIC_STRIPE_PUBLIC_KEY": "pk_test_51M8g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0",
+    "STRIPE_SECRET_KEY": "sk_test_51M8g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0g5fK0"
   },
   "functions": {
     "app/api/**": {
