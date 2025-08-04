@@ -2,11 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Play, Clock, Target, Zap, CheckCircle, XCircle, Brain, Code } from 'lucide-react';
-import { CodeEditor } from '@/components/CodeEditor';
+import { Play, Clock, Target, Zap, CheckCircle, XCircle, Brain, Code, BookOpen } from 'lucide-react';
+import { CodeExecutor } from '@/components/CodeExecutor';
 import { TypingMetrics } from '@/components/TypingMetrics';
 import { XPProgressBar } from '@/components/XPProgressBar';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
+import { useSession } from 'next-auth/react';
 
 interface Challenge {
   id: string;
@@ -23,7 +24,8 @@ interface Challenge {
   starterCode: {
     javascript: string;
     python: string;
-    typescript: string;
+    java: string;
+    cpp: string;
   };
   hints: string[];
   solution?: string;
@@ -46,7 +48,8 @@ const mockChallenges: Challenge[] = [
     starterCode: {
       javascript: 'function twoSum(nums, target) {\n    // Your solution here\n    \n}',
       python: 'def two_sum(nums, target):\n    # Your solution here\n    pass',
-      typescript: 'function twoSum(nums: number[], target: number): number[] {\n    // Your solution here\n    \n}',
+      java: 'public int[] twoSum(int[] nums, int target) {\n    // Your solution here\n    \n}',
+      cpp: 'vector<int> twoSum(vector<int>& nums, int target) {\n    // Your solution here\n    \n}',
     },
     hints: [
       'Consider using a hash map for O(n) solution',
@@ -68,7 +71,8 @@ const mockChallenges: Challenge[] = [
     starterCode: {
       javascript: 'function forwardPass(input, weights, biases) {\n    // Implement forward pass\n    \n}',
       python: 'def forward_pass(input_data, weights, biases):\n    # Implement forward pass\n    pass',
-      typescript: 'function forwardPass(input: number[][], weights: number[][], biases: number[]): number[] {\n    // Implement forward pass\n    \n}',
+      java: 'public double[] forwardPass(double[][] input, double[][] weights, double[] biases) {\n    // Implement forward pass\n    \n}',
+      cpp: 'vector<double> forwardPass(vector<vector<double>>& input, vector<vector<double>>& weights, vector<double>& biases) {\n    // Implement forward pass\n    \n}',
     },
     hints: [
       'Use matrix multiplication for input * weights',
@@ -82,7 +86,7 @@ const mockChallenges: Challenge[] = [
 export default function PracticePage() {
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [code, setCode] = useState('');
-  const [language, setLanguage] = useState<'javascript' | 'python' | 'typescript'>('javascript');
+  const [language, setLanguage] = useState<'javascript' | 'python' | 'java' | 'cpp'>('javascript');
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [testResults, setTestResults] = useState<Array<{passed: boolean, output: string}>>([]);
@@ -230,8 +234,9 @@ export default function PracticePage() {
                     className="bg-cyber-light border border-gray-600 rounded-lg px-3 py-2 text-white"
                   >
                     <option value="javascript">JavaScript</option>
-                    <option value="typescript">TypeScript</option>
                     <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
                   </select>
                   
                   <div className="flex items-center gap-2 text-white">
@@ -253,11 +258,11 @@ export default function PracticePage() {
             <div className="flex flex-1">
               {/* Code Editor */}
               <div className="flex-1">
-                <CodeEditor
-                  value={code}
-                  onChange={setCode}
+                <CodeExecutor
+                  initialCode={code}
                   language={language}
-                  theme="dark"
+                  context="practice"
+                  height="500px"
                 />
               </div>
 

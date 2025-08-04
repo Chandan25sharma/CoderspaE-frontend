@@ -4,6 +4,28 @@ import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
+import Session from '@/models/Session';
+
+// Helper function to get client IP and device info
+function getClientInfo(req: any) {
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = forwarded ? forwarded.split(',')[0] : req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  
+  return { ip, userAgent };
+}
+
+// Helper function to parse user agent
+function parseUserAgent(userAgent: string) {
+  const browserMatch = userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?([\d\.]+)/);
+  const osMatch = userAgent.match(/(Windows|Mac|Linux|Android|iOS)/);
+  
+  return {
+    browser: browserMatch ? `${browserMatch[1]} ${browserMatch[2]}` : 'Unknown',
+    os: osMatch ? osMatch[1] : 'Unknown',
+    device: userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+  };
+}
 
 const handler = NextAuth({
   providers: [
@@ -68,24 +90,97 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
+      await connectDB();
+      
+      let existingUser;
+      
       if (account?.provider === 'google') {
-        await connectDB();
-        
-        let existingUser = await User.findOne({ email: user.email });
+        existingUser = await User.findOne({ email: user.email });
         
         if (!existingUser) {
           existingUser = await User.create({
             email: user.email,
             name: user.name,
             image: user.image,
+            googleProfile: {
+              id: account.providerAccountId,
+              profileUrl: `https://plus.google.com/${account.providerAccountId}`
+            },
+            isVerified: true,
+            loginCount: 1,
           });
         } else {
-          // Update last active
+          // Update user info and increment login count
           existingUser.lastActive = new Date();
+          existingUser.loginCount += 1;
+          existingUser.image = user.image || existingUser.image;
+          existingUser.name = user.name || existingUser.name;
+          if (!existingUser.googleProfile?.id) {
+            existingUser.googleProfile = {
+              id: account.providerAccountId,
+              profileUrl: `https://plus.google.com/${account.providerAccountId}`
+            };
+          }
           await existingUser.save();
         }
+        
+        // Create session record
+        await Session.create({
+          userId: existingUser._id.toString(),
+          userEmail: existingUser.email,
+          userName: existingUser.name,
+          provider: 'google',
+          loginTime: new Date(),
+          lastActivity: new Date(),
+          isActive: true,
+        });
       }
+      
+      if (account?.provider === 'github') {
+        existingUser = await User.findOne({ email: user.email });
+        
+        if (!existingUser) {
+          existingUser = await User.create({
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            githubProfile: {
+              id: account.providerAccountId,
+              username: (profile as { login?: string })?.login || user.name,
+              profileUrl: `https://github.com/${(profile as { login?: string })?.login || user.name}`
+            },
+            isVerified: true,
+            loginCount: 1,
+          });
+        } else {
+          // Update user info and increment login count
+          existingUser.lastActive = new Date();
+          existingUser.loginCount += 1;
+          existingUser.image = user.image || existingUser.image;
+          existingUser.name = user.name || existingUser.name;
+          if (!existingUser.githubProfile?.id) {
+            existingUser.githubProfile = {
+              id: account.providerAccountId,
+              username: (profile as { login?: string })?.login || user.name,
+              profileUrl: `https://github.com/${(profile as { login?: string })?.login || user.name}`
+            };
+          }
+          await existingUser.save();
+        }
+        
+        // Create session record
+        await Session.create({
+          userId: existingUser._id.toString(),
+          userEmail: existingUser.email,
+          userName: existingUser.name,
+          provider: 'github',
+          loginTime: new Date(),
+          lastActivity: new Date(),
+          isActive: true,
+        });
+      }
+      
       return true;
     },
     async session({ session }) {

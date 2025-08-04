@@ -34,9 +34,11 @@ export async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      dbName: 'coderspae', // Explicitly use the coderspae database
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('Connected to MongoDB - Database: coderspae');
       return mongoose;
     });
   }

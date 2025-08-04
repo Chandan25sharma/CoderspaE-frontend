@@ -13,6 +13,20 @@ export interface IUser extends Document {
   preferredLanguage: string;
   joinedAt: Date;
   lastActive: Date;
+  githubProfile?: {
+    id: string;
+    username: string;
+    profileUrl: string;
+  };
+  googleProfile?: {
+    id: string;
+    profileUrl: string;
+  };
+  totalCodeExecutions: number;
+  favoriteLanguages: string[];
+  loginCount: number;
+  lastLoginIp?: string;
+  isVerified: boolean;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -64,6 +78,35 @@ const UserSchema = new Schema<IUser>({
   lastActive: {
     type: Date,
     default: Date.now,
+  },
+  githubProfile: {
+    id: { type: String, default: null },
+    username: { type: String, default: null },
+    profileUrl: { type: String, default: null },
+  },
+  googleProfile: {
+    id: { type: String, default: null },
+    profileUrl: { type: String, default: null },
+  },
+  totalCodeExecutions: {
+    type: Number,
+    default: 0,
+  },
+  favoriteLanguages: [{
+    type: String,
+    default: [],
+  }],
+  loginCount: {
+    type: Number,
+    default: 0,
+  },
+  lastLoginIp: {
+    type: String,
+    default: null,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
   },
 }, {
   timestamps: true,
