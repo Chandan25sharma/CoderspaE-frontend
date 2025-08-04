@@ -5,7 +5,7 @@
   "outputDirectory": ".next",
   "installCommand": "npm install --legacy-peer-deps",
   "env": {
-    "NEXTAUTH_URL": "https://your-app-name.vercel.app",
+    "NEXTAUTH_URL": "https://coderspae.com",
     "NEXTAUTH_SECRET": "ab16fd32cd407146fbf764c67d58a013",
     "MONGODB_URI": "mongodb+srv://coderspae-user:yWgCu64U3kBN1rcm@alunguai.jplvz2e.mongodb.net/?retryWrites=true&w=majority&appName=AlunguAi",
     "GOOGLE_CLIENT_ID": "1063576302817-ej0s0uttktijevteu8niroabbssm0fin.apps.googleusercontent.com",
@@ -23,7 +23,7 @@
   "rewrites": [
     {
       "source": "/api/backend/(.*)",
-      "destination": "https://your-railway-backend-url.railway.app/api/$1"
+      "destination": "https://loyal-flexibility-production.up.railway.app/api/$1"
     }
   ]
 }
