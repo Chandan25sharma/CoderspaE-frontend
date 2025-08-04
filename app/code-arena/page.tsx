@@ -6,6 +6,19 @@ import { Zap, Users, Timer, Trophy, Coins, Snowflake, Bug, Eye, Shield, Clock } 
 import BattleView from '../../components/BattleView';
 import PowerUpBar from '../../components/PowerUpBar';
 
+interface Player {
+  id: string;
+  username: string;
+  avatar: string;
+  language: 'javascript' | 'python' | 'java' | 'cpp';
+  code: string;
+  testsPassed: number;
+  totalTests: number;
+  accuracy: number;
+  isReady: boolean;
+  isWinner: boolean;
+}
+
 const mockPowerUps = [
   {
     id: 'freeze',
@@ -84,7 +97,7 @@ const mockProblem = {
 const CodeArenaPage = () => {
   const [gamePhase, setGamePhase] = useState<'waiting' | 'battle' | 'finished'>('waiting');
   const [timeLeft, setTimeLeft] = useState(480); // 8 minutes
-  const [spectatorCount, setSpectatorCount] = useState(157);
+  const [spectatorCount, setSpectatorCount] = useState(0); // No real watchers
   const [coins, setCoins] = useState(250);
   const [powerUps, setPowerUps] = useState(mockPowerUps);
   const [activePowerUps, setActivePowerUps] = useState<Array<{
@@ -94,65 +107,8 @@ const CodeArenaPage = () => {
     target?: string;
   }>>([]);
   
-  const [players, setPlayers] = useState([
-    {
-      id: 'player1',
-      username: 'PowerCoder',
-      avatar: '/api/placeholder/32/32',
-      language: 'python' as const,
-      code: `def rotate(nums, k):
-    # Your power-enhanced solution here
-    n = len(nums)
-    k = k % n
-    
-    # Reverse entire array
-    nums.reverse()
-    
-    # Reverse first k elements
-    nums[:k] = reversed(nums[:k])
-    
-    # Reverse remaining elements
-    nums[k:] = reversed(nums[k:])
-    
-    return nums`,
-      testsPassed: 3,
-      totalTests: 5,
-      accuracy: 60,
-      isReady: true,
-      isWinner: false,
-    },
-    {
-      id: 'player2',
-      username: 'BattleMaster',
-      avatar: '/api/placeholder/32/32',
-      language: 'javascript' as const,
-      code: `function rotate(nums, k) {
-    // Strategic power-up usage required!
-    const n = nums.length;
-    k = k % n;
-    
-    // Three-step reversal approach
-    reverse(nums, 0, n - 1);
-    reverse(nums, 0, k - 1);
-    reverse(nums, k, n - 1);
-    
-    return nums;
-}
-
-function reverse(arr, start, end) {
-    while (start < end) {
-        [arr[start], arr[end]] = [arr[end], arr[start]];
-        start++;
-        end--;
-    }
-}`,
-      testsPassed: 4,
-      totalTests: 5,
-      accuracy: 80,
-      isReady: true,
-      isWinner: false,
-    }
-  ]);
+  // Remove dummy players when no real battle is active
+  const [players, setPlayers] = useState<Player[]>([]);
 
   const [battleEvents, setBattleEvents] = useState<Array<{
     id: string;

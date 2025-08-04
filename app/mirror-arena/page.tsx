@@ -75,39 +75,13 @@ const MirrorArenaPage = () => {
   const { data: session } = useSession();
   const [gamePhase, setGamePhase] = useState<'waiting' | 'battle' | 'finished'>('waiting');
   const [timeLeft, setTimeLeft] = useState(mockProblem.timeLimit);
-  const [spectatorCount, setSpectatorCount] = useState(156);
+  const [spectatorCount, setSpectatorCount] = useState(0); // Changed from 156 to 0
   const [revealPercentage, setRevealPercentage] = useState(25);
   const [isSpectator, setIsSpectator] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<'javascript' | 'python' | 'java' | 'cpp'>('javascript');
   
-  const [players] = useState<Player[]>([
-    {
-      id: 'player1',
-      username: 'PythonMaster',
-      avatar: '🐍',
-      language: 'python',
-      testsPassed: 3,
-      totalTests: 4,
-      accuracy: 75,
-      wpm: 87,
-      status: 'coding',
-      rank: 1,
-      progress: 85
-    },
-    {
-      id: 'player2',
-      username: 'CppCoder',
-      avatar: '⚡',
-      language: 'cpp',
-      testsPassed: 4,
-      totalTests: 4,
-      accuracy: 100,
-      wpm: 92,
-      status: 'finished',
-      rank: 2,
-      progress: 100
-    }
-  ]);
+  // Remove dummy players when no real battle is active
+  const [players] = useState<Player[]>([]);
 
   // Timer effect
   useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { 
   User, Trophy, Star, Calendar, Target, Activity, BarChart3, 
   Zap, Edit3, Settings, MapPin, Link as LinkIcon, Users
@@ -114,8 +115,25 @@ const mockRecentActivity: RecentActivity[] = [
 ];
 
 export default function ProfilePage() {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState('overview');
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Use real user data from session when available
+  const userData = {
+    username: session?.user?.name || 'CodeMaster_2024',
+    email: session?.user?.email || 'user@example.com',
+    avatar: session?.user?.image || '/avatars/default.png',
+    title: 'Elite Coder',
+    bio: 'Passionate developer with expertise in full-stack development and competitive programming.',
+    location: 'San Francisco, CA',
+    website: 'https://codemaster.dev',
+    socialLinks: {
+      github: 'github-username',
+      twitter: 'twitter-handle',
+      linkedin: 'linkedin-profile'
+    }
+  };
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -145,7 +163,7 @@ export default function ProfilePage() {
           
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-white">{mockUserData.username}</h1>
+              <h1 className="text-3xl font-bold text-white">{userData.username}</h1>
               <AnimatedBadge 
                 type="gold" 
                 category="contribution" 
@@ -153,12 +171,12 @@ export default function ProfilePage() {
                 size="md" 
               />
             </div>
-            <p className="text-gray-400 mb-3">{mockUserData.bio}</p>
+            <p className="text-gray-400 mb-3">{userData.bio}</p>
             
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                <span>{mockUserData.location}</span>
+                <span>{userData.location}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -166,8 +184,8 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-1">
                 <LinkIcon className="h-4 w-4" />
-                <a href={mockUserData.website} className="text-neon-blue hover:underline">
-                  {mockUserData.website}
+                <a href={userData.website} className="text-neon-blue hover:underline">
+                  {userData.website}
                 </a>
               </div>
             </div>
