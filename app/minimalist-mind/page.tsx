@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Target, TrendingUp, Code, Clock, Zap, Award, RotateCcw } from 'lucide-react';
+import { Brain, Target, TrendingUp, Code, Clock, Zap, Award, RotateCcw, Loader2 } from 'lucide-react';
 import { CodeEditor } from '../../components/CodeEditor';
 import MetricsChart from '../../components/MetricsChart';
+import { challengeApi } from '../../lib/api';
 
 interface MetricsData {
   codeLength: number;
@@ -15,50 +16,74 @@ interface MetricsData {
   timestamp: string;
 }
 
-const mockChallenge = {
-  title: "Optimize Binary Search",
-  description: "Implement binary search with the most efficient code possible. Focus on minimizing code length while maintaining optimal time complexity.",
-  difficulty: "Medium" as const,
+interface Challenge {
+  _id: string;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert';
   targetMetrics: {
-    codeLength: 150,
-    runtime: 1,
-    memoryUsage: 2.5,
-    complexity: 3,
-    efficiency: 85,
-  },
-  examples: [
-    {
-      input: "arr = [1,3,5,7,9,11], target = 7",
-      output: "3",
-      explanation: "Target 7 is at index 3"
-    }
-  ]
-};
+    codeLength: number;
+    runtime: number;
+    memoryUsage: number;
+    complexity: number;
+    efficiency: number;
+  };
+  examples: Array<{
+    input: string;
+    output: string;
+    explanation: string;
+  }>;
+  starterCode?: string;
+  constraints?: string[];
+  hints?: string[];
+}
 
 const CognitiveChallengesPage = () => {
-  const [code, setCode] = useState(`def binary_search(arr, target):
-    # Your optimized solution here
-    left, right = 0, len(arr) - 1
-    
-    while left <= right:
-        mid = (left + right) // 2
-        if arr[mid] == target:
-            return mid
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    
-    return -1`);
-
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState('');
   const [currentMetrics, setCurrentMetrics] = useState<MetricsData>({
-    codeLength: 285,
-    runtime: 8,
-    memoryUsage: 4.2,
-    complexity: 4,
-    efficiency: 72,
+    codeLength: 0,
+    runtime: 0,
+    memoryUsage: 0,
+    complexity: 0,
+    efficiency: 0,
     timestamp: new Date().toISOString()
   });
+
+  // Fetch challenge data
+  useEffect(() => {
+    const fetchChallenge = async () => {
+      try {
+        setLoading(true);
+        // Fetch challenges focusing on optimization/minimalist problems
+        const response = await challengeApi.getAll({ 
+          difficulty: 'Medium',
+          active: true 
+        });
+        if (response.challenges && response.challenges.length > 0) {
+          const randomChallenge = response.challenges[Math.floor(Math.random() * response.challenges.length)];
+          setChallenge(randomChallenge);
+          
+          // Set starter code if available
+          setCode(randomChallenge.starterCode || `def solve(input_data):
+    # Your optimized solution here
+    # Focus on: Code Length, Runtime, Memory Usage
+    pass`);
+        } else {
+          setError('No optimization challenges available');
+        }
+      } catch (err) {
+        console.error('Failed to fetch challenge:', err);
+        setError('Failed to load challenges. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChallenge();
+  }, []);
 
   const [metricsHistory, setMetricsHistory] = useState<MetricsData[]>([
     { codeLength: 350, runtime: 15, memoryUsage: 6.1, complexity: 6, efficiency: 45, timestamp: '2025-01-01T10:00:00Z' },
@@ -177,6 +202,38 @@ const CognitiveChallengesPage = () => {
     }
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Loading Challenge...</h2>
+          <p className="text-gray-400">Preparing your minimalist coding challenge</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !challenge) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Challenge Loading Failed</h2>
+          <p className="text-gray-400 mb-6">{error || 'Unable to load challenge data'}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
@@ -221,28 +278,28 @@ const CognitiveChallengesPage = () => {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">{mockChallenge.title}</h2>
+                  <h2 className="text-xl font-bold">{challenge.title}</h2>
                   <span 
                     className="px-2 py-1 rounded text-xs font-semibold"
                     style={{ 
-                      backgroundColor: `${getDifficultyColor(mockChallenge.difficulty)}20`,
-                      color: getDifficultyColor(mockChallenge.difficulty)
+                      backgroundColor: `${getDifficultyColor(challenge.difficulty)}20`,
+                      color: getDifficultyColor(challenge.difficulty)
                     }}
                   >
-                    {mockChallenge.difficulty}
+                    {challenge.difficulty}
                   </span>
                 </div>
                 <Target className="text-yellow-400" size={20} />
               </div>
               
-              <p className="text-gray-300 mb-4">{mockChallenge.description}</p>
+              <p className="text-gray-300 mb-4">{challenge?.description}</p>
               
               <div className="bg-gray-900 border border-gray-600 rounded p-4">
                 <h4 className="font-semibold mb-2">Example:</h4>
                 <div className="font-mono text-sm">
-                  <div className="text-green-400">Input: {mockChallenge.examples[0].input}</div>
-                  <div className="text-blue-400">Output: {mockChallenge.examples[0].output}</div>
-                  <div className="text-gray-400 mt-1">{mockChallenge.examples[0].explanation}</div>
+                  <div className="text-green-400">Input: {challenge?.examples[0]?.input}</div>
+                  <div className="text-blue-400">Output: {challenge?.examples[0]?.output}</div>
+                  <div className="text-gray-400 mt-1">{challenge?.examples[0]?.explanation}</div>
                 </div>
               </div>
 
@@ -252,23 +309,23 @@ const CognitiveChallengesPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                   <div className="bg-gray-900 p-2 rounded">
                     <div className="text-gray-400">Length</div>
-                    <div className="font-bold">≤{mockChallenge.targetMetrics.codeLength}</div>
+                    <div className="font-bold">≤{challenge?.targetMetrics.codeLength}</div>
                   </div>
                   <div className="bg-gray-900 p-2 rounded">
                     <div className="text-gray-400">Runtime</div>
-                    <div className="font-bold">≤{mockChallenge.targetMetrics.runtime}ms</div>
+                    <div className="font-bold">≤{challenge?.targetMetrics.runtime}ms</div>
                   </div>
                   <div className="bg-gray-900 p-2 rounded">
                     <div className="text-gray-400">Memory</div>
-                    <div className="font-bold">≤{mockChallenge.targetMetrics.memoryUsage}MB</div>
+                    <div className="font-bold">≤{challenge?.targetMetrics.memoryUsage}MB</div>
                   </div>
                   <div className="bg-gray-900 p-2 rounded">
                     <div className="text-gray-400">Complexity</div>
-                    <div className="font-bold">≤{mockChallenge.targetMetrics.complexity}</div>
+                    <div className="font-bold">≤{challenge?.targetMetrics.complexity}</div>
                   </div>
                   <div className="bg-gray-900 p-2 rounded">
                     <div className="text-gray-400">Efficiency</div>
-                    <div className="font-bold">≥{mockChallenge.targetMetrics.efficiency}%</div>
+                    <div className="font-bold">≥{challenge?.targetMetrics.efficiency}%</div>
                   </div>
                 </div>
               </div>
@@ -352,7 +409,13 @@ const CognitiveChallengesPage = () => {
             <MetricsChart
               currentMetrics={currentMetrics}
               history={metricsHistory}
-              targetMetrics={mockChallenge.targetMetrics}
+              targetMetrics={challenge?.targetMetrics || {
+                codeLength: 150,
+                runtime: 1,
+                memoryUsage: 2.5,
+                complexity: 3,
+                efficiency: 85
+              }}
               showComparison={showComparison}
             />
 

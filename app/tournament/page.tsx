@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Trophy, Calendar, Users, Star, Loader2 } from 'lucide-react';
 // import { AnimatedBadge } from '../../components/AnimatedBadge';
-import { tournamentApi } from '../lib/api';
+import { tournamentApi } from '../../lib/api';
 
 interface Tournament {
   _id: string;
