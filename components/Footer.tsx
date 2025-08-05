@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="bg-slate-900/80 border-t border-purple-500/20 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="space-y-3">
             <h3 className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -65,6 +65,38 @@ export function Footer() {
               <li>
                 <Link href="/about" className="text-gray-400 hover:text-purple-400 transition-colors">
                   About Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-3">
+            <h4 className="text-white font-semibold">Legal</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/privacy" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/security" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Security Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/data-protection" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Data Protection
                 </Link>
               </li>
             </ul>
