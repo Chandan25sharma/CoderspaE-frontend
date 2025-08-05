@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useBattleSocket } from '@/hooks/useBattleSocket';
 import { Swords, Trophy, Target, Clock, Users, Play, Loader } from 'lucide-react';
+import GameLayout from '../../components/GameLayout';
 
 interface UserStats {
   rating?: number;
@@ -40,9 +41,11 @@ export default function Dashboard() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader className="h-8 w-8 animate-spin text-purple-400" />
-      </div>
+      <GameLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader className="h-8 w-8 animate-spin text-purple-400" />
+        </div>
+      </GameLayout>
     );
   }
 
@@ -63,7 +66,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <GameLayout>
+      <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -238,6 +242,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </GameLayout>
   );
 }

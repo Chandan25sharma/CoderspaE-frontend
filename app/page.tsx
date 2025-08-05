@@ -2,12 +2,14 @@
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { Swords, Trophy, Users, Code, Globe, Zap, ArrowRight, Play } from 'lucide-react';
+import GameLayout from '../components/GameLayout';
 
 export default function Home() {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen">
+    <GameLayout>
+      <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
@@ -164,6 +166,7 @@ export default function Home() {
           )}
         </div>
       </section>
-    </div>
+      </div>
+    </GameLayout>
   );
 }

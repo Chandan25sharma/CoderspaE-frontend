@@ -2,12 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { 
-  User, Trophy, Star, Target, Activity, 
-  Zap, Edit3, MapPin, Link as LinkIcon, Save, X, Loader2
+  User, Trophy, Star, Calendar, Target, Activity, BarChart3, 
+  Zap, Edit3, Settings, MapPin, Link as LinkIcon, Save, 
+  Eye, EyeOff, Camera, Shield, Globe
 } from 'lucide-react';
+import { AnimatedBadge } from '../../components/AnimatedBadge';
 import { XPProgressBar } from '../../components/XPProgressBar';
-import { userApi } from '../../lib/api';
+import { ConfettiCelebration } from '../../components/ConfettiCelebration';
+import GameLayout from '../../components/GameLayout';
+import Image from 'next/image';
 
 interface UserProfile {
   _id: string;
