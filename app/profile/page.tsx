@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { 
   User, Trophy, Star, Calendar, Target, Activity, BarChart3, 
   Zap, Edit3, Settings, MapPin, Link as LinkIcon, Save, 
-  Eye, EyeOff, Camera, Shield, Globe
+  Eye, EyeOff, Camera, Shield, Globe, Loader2, X
 } from 'lucide-react';
 import { AnimatedBadge } from '../../components/AnimatedBadge';
 import { XPProgressBar } from '../../components/XPProgressBar';
