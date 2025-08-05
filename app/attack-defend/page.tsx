@@ -563,7 +563,7 @@ const AttackDefendPage = () => {
                     onClick={runCollision}
                     className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded font-semibold transition-colors"
                   >
-                    🎯 Launch Code Collision!
+                    Launch Code Collision!
                   </motion.button>
                 )}
               </div>

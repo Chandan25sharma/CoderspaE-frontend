@@ -186,7 +186,7 @@ const CognitiveChallengesPage = () => {
             <div className="flex items-center gap-4">
               <Brain className="text-purple-400" size={32} />
               <div>
-                <h1 className="text-3xl font-bold">🧠 Minimalist Mind Mode</h1>
+                <h1 className="text-3xl font-bold">Minimalist Mind Mode</h1>
                 <p className="text-gray-400">Optimize your code for maximum efficiency</p>
               </div>
             </div>

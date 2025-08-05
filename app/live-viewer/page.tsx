@@ -106,7 +106,7 @@ export default function LiveViewerPage() {
       players: [
         {
           username: 'DeepCode',
-          avatar: '🤖',
+          avatar: '',
           language: 'python',
           rank: 1,
           progress: 100,
@@ -115,7 +115,7 @@ export default function LiveViewerPage() {
         },
         {
           username: 'NeuralNet',
-          avatar: '🧠',
+          avatar: '',
           language: 'python',
           rank: 2,
           progress: 95,

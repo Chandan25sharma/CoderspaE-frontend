@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Trophy, Medal, Crown, TrendingUp, Users, Target } from 'lucide-react';
-import Image from 'next/image';
+
 
 interface LeaderboardUser {
   _id: string;
@@ -30,61 +30,7 @@ export default function LeaderboardPage() {
       // For demo purposes, we'll create mock data
       // In a real app, this would fetch from your API
       const mockUsers: LeaderboardUser[] = [
-        {
-          _id: '1',
-          name: 'Alex Chen',
-          email: 'alex@example.com',
-          image: '/api/placeholder/40/40',
-          rating: 1850,
-          battlesWon: 45,
-          battlesLost: 12,
-          totalBattles: 57,
-          winRate: 79
-        },
-        {
-          _id: '2',
-          name: 'Sarah Johnson',
-          email: 'sarah@example.com',
-          image: '/api/placeholder/40/40',
-          rating: 1720,
-          battlesWon: 38,
-          battlesLost: 15,
-          totalBattles: 53,
-          winRate: 72
-        },
-        {
-          _id: '3',
-          name: 'Miguel Rodriguez',
-          email: 'miguel@example.com',
-          image: '/api/placeholder/40/40',
-          rating: 1680,
-          battlesWon: 42,
-          battlesLost: 18,
-          totalBattles: 60,
-          winRate: 70
-        },
-        {
-          _id: '4',
-          name: 'Priya Sharma',
-          email: 'priya@example.com',
-          image: '/api/placeholder/40/40',
-          rating: 1590,
-          battlesWon: 35,
-          battlesLost: 20,
-          totalBattles: 55,
-          winRate: 64
-        },
-        {
-          _id: '5',
-          name: 'David Kim',
-          email: 'david@example.com',
-          image: '/api/placeholder/40/40',
-          rating: 1540,
-          battlesWon: 29,
-          battlesLost: 16,
-          totalBattles: 45,
-          winRate: 64
-        }
+       
       ];
       
       setUsers(mockUsers);
