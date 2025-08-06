@@ -112,15 +112,47 @@ export const userApi = {
     apiRequest<{ user: any }>(`/users/${userId}`),
 
   // Get current user's profile
-  getMyProfile: () => 
-    apiRequest<{ user: any }>('/users/me/profile'),
+  getMyProfile: async () => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
+  },
 
   // Update profile
-  updateProfile: (data: any) => 
-    apiRequest<{ user: any; message: string }>('/users/me/profile', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+  updateProfile: async (data: any) => {
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  },
 
   // Get leaderboard
   getLeaderboard: (params?: { page?: number; limit?: number }) => {

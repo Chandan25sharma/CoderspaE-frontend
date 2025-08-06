@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Trophy, Medal, Crown, TrendingUp, Users, Target } from 'lucide-react';
 
 
@@ -16,6 +17,7 @@ interface LeaderboardUser {
 }
 
 export default function LeaderboardPage() {
+  const { data: session } = useSession();
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'all-time' | 'monthly' | 'weekly'>('all-time');
@@ -219,17 +221,37 @@ export default function LeaderboardPage() {
         <div className="mt-8 bg-slate-800/50 rounded-lg border border-blue-500/20 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Your Current Ranking</h3>
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
-              <span className="text-white font-semibold">?</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-white">Sign in to see your ranking</p>
-              <p className="text-gray-400 text-sm">Battle other coders to climb the leaderboard</p>
-            </div>
-            <div className="text-right">
-              <p className="text-blue-400 font-semibold">Unranked</p>
-              <p className="text-gray-400 text-sm">Join battles to get ranked</p>
-            </div>
+            {session?.user ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
+                  <span className="text-white font-semibold">
+                    {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-semibold">{session.user.name || 'Player'}</p>
+                  <p className="text-gray-400 text-sm">Level 1 • 0 battles won</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-blue-400 font-semibold">#{Math.floor(Math.random() * 1000) + 100}</p>
+                  <p className="text-gray-400 text-sm">Start battling to improve</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
+                  <span className="text-white font-semibold">?</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-white">Sign in to see your ranking</p>
+                  <p className="text-gray-400 text-sm">Battle other coders to climb the leaderboard</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-blue-400 font-semibold">Unranked</p>
+                  <p className="text-gray-400 text-sm">Join battles to get ranked</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

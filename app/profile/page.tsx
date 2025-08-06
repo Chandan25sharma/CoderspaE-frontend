@@ -2,18 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
 import { 
-  User, Trophy, Star, Calendar, Target, Activity, BarChart3, 
-  Zap, Edit3, Settings, MapPin, Link as LinkIcon, Save, 
-  Eye, EyeOff, Camera, Shield, Globe, Loader2, X
+  User, Trophy, Star, Target, Activity, 
+  Zap, Edit3, MapPin, Link as LinkIcon, Save, X, Loader2
 } from 'lucide-react';
-import { AnimatedBadge } from '../../components/AnimatedBadge';
 import { XPProgressBar } from '../../components/XPProgressBar';
-import { ConfettiCelebration } from '../../components/ConfettiCelebration';
-import GameLayout from '../../components/GameLayout';
 import { userApi } from '../../lib/api';
-import Image from 'next/image';
 
 interface UserProfile {
   _id: string;
@@ -57,7 +51,7 @@ interface UserProfile {
   joinedAt: string;
 }
 
-export default function ProfilePage() {
+const ProfilePage = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -524,4 +518,6 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-}
+};
+
+export default ProfilePage;

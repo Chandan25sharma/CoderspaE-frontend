@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
 import Session from '@/models/Session';
@@ -47,7 +48,7 @@ const handler = NextAuth({
         isSignUp: { label: 'Is Sign Up', type: 'text' },
       },
       async authorize(credentials) {
-        if (!credentials?.email) {
+        if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
@@ -60,9 +61,15 @@ const handler = NextAuth({
             throw new Error('User already exists');
           }
           
+          // Hash password
+          const hashedPassword = await bcrypt.hash(credentials.password, 12);
+          
           const newUser = await User.create({
             email: credentials.email,
             name: credentials.name || credentials.email.split('@')[0],
+            password: hashedPassword,
+            isVerified: true,
+            role: 'user'
           });
           
           return {
@@ -77,7 +84,18 @@ const handler = NextAuth({
         // Handle sign in
         const user = await User.findOne({ email: credentials.email });
         if (!user) {
-          return null;
+          throw new Error('No user found with this email');
+        }
+
+        // Check password
+        if (user.password) {
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+          if (!isValidPassword) {
+            throw new Error('Invalid password');
+          }
+        } else {
+          // User might be OAuth user without password
+          throw new Error('Please sign in with the method you used to create this account');
         }
 
         return {

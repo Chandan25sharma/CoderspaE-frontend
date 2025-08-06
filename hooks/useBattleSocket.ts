@@ -53,9 +53,14 @@ export function useBattleSocket() {
   useEffect(() => {
     if (!session?.user) return;
 
-    const newSocket = io('http://localhost:4000', {
-      transports: ['websocket'],
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'ws://localhost:4000';
+    console.log('Connecting to socket server:', socketUrl);
+
+    const newSocket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
       autoConnect: true,
+      timeout: 10000,
+      forceNew: true,
     });
 
     newSocket.on('connect', () => {
@@ -65,17 +70,27 @@ export function useBattleSocket() {
       reconnectAttempts.current = 0;
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('Disconnected from Socket.IO server');
+    newSocket.on('disconnect', (reason) => {
+      console.log('Disconnected from Socket.IO server:', reason);
       setStatus('disconnected');
+      setError('Connection lost. Attempting to reconnect...');
       
       // Attempt to reconnect
       if (reconnectAttempts.current < maxReconnectAttempts) {
         reconnectAttempts.current++;
         setTimeout(() => {
+          console.log(`Reconnection attempt ${reconnectAttempts.current}`);
           newSocket.connect();
         }, 2000 * reconnectAttempts.current);
+      } else {
+        setError('Unable to connect to battle server. Please refresh the page.');
       }
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setError('Failed to connect to battle server. Please check your connection.');
+      setStatus('disconnected');
     });
 
     newSocket.on('waiting_for_opponent', () => {
@@ -88,7 +103,6 @@ export function useBattleSocket() {
       setStatus('matched');
       
       // Find opponent
-      const currentUser = data.players.find(p => p.id === session.user.id);
       const opponentData = data.players.find(p => p.id !== session.user.id);
       setOpponent(opponentData || null);
       

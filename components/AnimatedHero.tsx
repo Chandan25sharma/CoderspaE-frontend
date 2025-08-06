@@ -187,7 +187,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
           </AnimatePresence>
           <br />
           <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Win.
+            
           </span>
         </motion.h1>
 

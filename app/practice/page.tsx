@@ -84,6 +84,9 @@ const mockChallenges: Challenge[] = [
 ];
 
 export default function PracticePage() {
+  const { data: session } = useSession();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState<'javascript' | 'python' | 'java' | 'cpp'>('javascript');
@@ -95,6 +98,65 @@ export default function PracticePage() {
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
   const [errors, setErrors] = useState(0);
+
+  // Fetch challenges from API
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/practice/challenges');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Convert API response to our Challenge interface
+          const convertedChallenges: Challenge[] = data.challenges.map((challenge: {
+            id?: string;
+            _id?: string;
+            title: string;
+            description: string;
+            difficulty: string;
+            category: string;
+            timeLimit?: number;
+            xpReward?: number;
+          }) => ({
+            id: challenge.id || challenge._id,
+            title: challenge.title,
+            description: challenge.description,
+            difficulty: challenge.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
+            category: challenge.category.toLowerCase().replace(/\s+/g, '-') as 'algorithms' | 'web3' | 'ai' | 'data-structures',
+            timeLimit: (challenge.timeLimit || 30) * 60, // Convert minutes to seconds
+            testCases: [
+              { input: 'Example input', expectedOutput: 'Expected output' }
+            ],
+            starterCode: {
+              javascript: 'function solve() {\n    // Your solution here\n    \n}',
+              python: 'def solve():\n    # Your solution here\n    pass',
+              java: 'public void solve() {\n    // Your solution here\n    \n}',
+              cpp: 'void solve() {\n    // Your solution here\n    \n}',
+            },
+            hints: [
+              'Think about the problem step by step',
+              'Consider edge cases',
+              'Optimize for time complexity'
+            ],
+            xpReward: challenge.xpReward || 50,
+          }));
+          setChallenges(convertedChallenges);
+        } else {
+          // Use fallback challenges if API fails
+          setChallenges(mockChallenges);
+        }
+      } catch (error) {
+        console.error('Error fetching challenges:', error);
+        // Use fallback challenges on error
+        setChallenges(mockChallenges);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChallenges();
+  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -126,7 +188,7 @@ export default function PracticePage() {
     if (!selectedChallenge) return;
     
     // Mock test execution
-    const results = selectedChallenge.testCases.map((testCase, index) => {
+    const results = selectedChallenge.testCases.map((testCase) => {
       // Simulate test results (in real app, this would execute the code)
       const passed = Math.random() > 0.3; // 70% pass rate for demo
       return {
@@ -338,45 +400,73 @@ export default function PracticePage() {
 
         {/* Challenge Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockChallenges.map((challenge, index) => {
-            const CategoryIcon = getCategoryIcon(challenge.category);
-            return (
-              <motion.div
-                key={challenge.id}
-                className="bg-cyber-gray rounded-2xl p-6 border border-gray-700 hover:border-neon-purple/50 transition-all cursor-pointer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                onClick={() => handleStartChallenge(challenge)}
-              >
+          {loading ? (
+            // Loading skeleton
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-cyber-gray rounded-2xl p-6 border border-gray-700 animate-pulse">
                 <div className="flex items-center justify-between mb-4">
-                  <CategoryIcon className="h-8 w-8 text-neon-blue" />
-                  <div className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(challenge.difficulty)} bg-current bg-opacity-20`}>
-                    {challenge.difficulty.toUpperCase()}
-                  </div>
+                  <div className="h-8 w-8 bg-gray-600 rounded"></div>
+                  <div className="h-6 w-16 bg-gray-600 rounded"></div>
                 </div>
-
-                <h3 className="text-xl font-bold text-white mb-2">{challenge.title}</h3>
-                <p className="text-gray-300 text-sm mb-4 line-clamp-3">{challenge.description}</p>
-
-                <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{formatTime(challenge.timeLimit)}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-4 w-4" />
-                    <span>{challenge.xpReward} XP</span>
-                  </div>
+                <div className="h-6 bg-gray-600 rounded mb-2"></div>
+                <div className="h-4 bg-gray-600 rounded mb-4"></div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-4 w-16 bg-gray-600 rounded"></div>
+                  <div className="h-4 w-16 bg-gray-600 rounded"></div>
                 </div>
+                <div className="h-12 bg-gray-600 rounded"></div>
+              </div>
+            ))
+          ) : challenges.length > 0 ? (
+            challenges.map((challenge, index) => {
+              const CategoryIcon = getCategoryIcon(challenge.category);
+              return (
+                <motion.div
+                  key={challenge.id}
+                  className="bg-cyber-gray rounded-2xl p-6 border border-gray-700 hover:border-neon-purple/50 transition-all cursor-pointer"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => handleStartChallenge(challenge)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <CategoryIcon className="h-8 w-8 text-neon-blue" />
+                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(challenge.difficulty)} bg-current bg-opacity-20`}>
+                      {challenge.difficulty.toUpperCase()}
+                    </div>
+                  </div>
 
-                <button className="w-full py-3 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-neon-purple/30 transition-all">
-                  Start Challenge
-                </button>
-              </motion.div>
-            );
-          })}
+                  <h3 className="text-xl font-bold text-white mb-2">{challenge.title}</h3>
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">{challenge.description}</p>
+
+                  <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{formatTime(challenge.timeLimit)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-4 w-4" />
+                      <span>{challenge.xpReward} XP</span>
+                    </div>
+                  </div>
+
+                  <button className="w-full py-3 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-neon-purple/30 transition-all">
+                    Start Challenge
+                  </button>
+                </motion.div>
+              );
+            })
+          ) : (
+            // No challenges found
+            <div className="col-span-full text-center py-12">
+              <BookOpen className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">No Challenges Available</h3>
+              <p className="text-gray-500">
+                Check back later or contact an administrator to add practice challenges.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,13 +1,15 @@
 'use client';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { Github, Mail, ArrowRight, Swords, User } from 'lucide-react';
+import { Github, Mail, ArrowRight, Swords, User, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function SignInPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCredentialsAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +18,7 @@ export default function SignInPage() {
     try {
       const result = await signIn('credentials', {
         email,
+        password,
         name: isSignUp ? name : '',
         isSignUp: isSignUp.toString(),
         callbackUrl: '/dashboard',
@@ -115,6 +118,29 @@ export default function SignInPage() {
                   className="w-full pl-10 pr-4 py-3 border border-purple-500/30 rounded-lg bg-slate-800/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Email address"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 border border-purple-500/30 rounded-lg bg-slate-800/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
               </div>
             </div>
 
