@@ -66,7 +66,7 @@ export default function SignUp() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push('/profile');
+        router.push('/');
       }
     } catch (error) {
       setError('An error occurred during sign up');
@@ -76,11 +76,11 @@ export default function SignUp() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/profile' });
+    signIn('google', { callbackUrl: '/' });
   };
 
   const handleGithubSignIn = () => {
-    signIn('github', { callbackUrl: '/profile' });
+    signIn('github', { callbackUrl: '/' });
   };
 
   return (

@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   User, Trophy, Star, Target, Activity, 
-  Zap, Edit3, MapPin, Link as LinkIcon, Save, X, Loader2
+  Zap, Edit3, MapPin, Link as LinkIcon, Save, X, Loader2, Home, ArrowLeft
 } from 'lucide-react';
 import { XPProgressBar } from '../../components/XPProgressBar';
 
@@ -196,6 +197,14 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Navigation Header */}
+      <div className="container mx-auto px-4 py-4">
+        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white transition-colors group">
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+          Back to Home
+        </Link>
+      </div>
+      
       <div className="container mx-auto px-4 py-8">
         {/* Profile Header */}
         <motion.div
