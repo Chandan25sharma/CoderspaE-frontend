@@ -53,7 +53,7 @@ export function useBattleSocket() {
   useEffect(() => {
     if (!session?.user) return;
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'ws://localhost:4000';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'ws://coderspae.com';
     console.log('Connecting to socket server:', socketUrl);
 
     const newSocket = io(socketUrl, {

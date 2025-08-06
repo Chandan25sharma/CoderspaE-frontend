@@ -26,15 +26,20 @@ export default function Dashboard() {
   }, [status, router]);
 
   useEffect(() => {
-    // Fetch user stats
-    if (session?.user?.id) {
-      fetch('/api/socket', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_user_stats', userId: session.user.id }),
-      })
+    // Fetch user stats from profile API
+    if (session?.user?.email) {
+      fetch('/api/user/profile')
         .then(res => res.json())
-        .then(data => setUserStats(data.stats))
+        .then(data => {
+          if (data.success && data.user) {
+            setUserStats({
+              rating: data.user.stats?.rating || 1000,
+              battlesWon: data.user.stats?.battlesWon || 0,
+              battlesLost: data.user.stats?.battlesLost || 0,
+              totalBattles: data.user.stats?.totalBattles || 0
+            });
+          }
+        })
         .catch(console.error);
     }
   }, [session]);

@@ -8,7 +8,7 @@ import User from '@/models/User';
 export async function GET() {
   return Response.json({ 
     message: 'Socket.IO server should be running on port 4000',
-    endpoint: 'http://localhost:4000'
+    endpoint: 'http://coderspae.com'
   });
 }
 

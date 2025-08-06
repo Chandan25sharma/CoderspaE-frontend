@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import { 
-  Code, 
   Trophy, 
   Users, 
   Settings, 
@@ -71,11 +71,17 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div
-                className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
-                whileHover={{ rotate: 180 }}
+                className="w-10 h-10 bg-gradient-to-br rounded-xl flex items-center justify-center relative overflow-hidden"
+                whileHover={{ rotate: 10 }}
                 transition={{ duration: 0.3 }}
               >
-                <Code className="w-6 h-6 text-white" />
+                <Image
+                  src="/icon.png"
+                  alt="CoderspaE Icon"
+                  width={220}
+                  height={200}
+                  className="object-contain"
+                />
               </motion.div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 CoderspaE

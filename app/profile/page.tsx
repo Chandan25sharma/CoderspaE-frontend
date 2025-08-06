@@ -7,7 +7,6 @@ import {
   Zap, Edit3, MapPin, Link as LinkIcon, Save, X, Loader2
 } from 'lucide-react';
 import { XPProgressBar } from '../../components/XPProgressBar';
-import { userApi } from '../../lib/api';
 
 interface UserProfile {
   _id: string;
@@ -73,22 +72,27 @@ const ProfilePage = () => {
     const fetchProfile = async () => {      
       try {
         setLoading(true);
-        // In a real app, you'd get the user ID from the session
-        // For now, we'll simulate getting the current user's profile
-        const response = await userApi.getMyProfile();
-        setUser(response.user);
+        // Use our Next.js API route instead of backend
+        const response = await fetch('/api/user/profile');
+        const data = await response.json();
         
-        // Initialize edit form
-        setEditForm({
-          name: response.user.name || '',
-          bio: response.user.profile?.bio || '',
-          location: response.user.profile?.location || '',
-          website: response.user.profile?.website || '',
-          github: response.user.profile?.socialLinks?.github || '',
-          twitter: response.user.profile?.socialLinks?.twitter || '',
-          linkedin: response.user.profile?.socialLinks?.linkedin || '',
-          title: response.user.profile?.title || ''
-        });
+        if (data.success && data.user) {
+          setUser(data.user);
+          
+          // Initialize edit form
+          setEditForm({
+            name: data.user.name || '',
+            bio: data.user.profile?.bio || '',
+            location: data.user.profile?.location || '',
+            website: data.user.profile?.website || '',
+            github: data.user.profile?.socialLinks?.github || '',
+            twitter: data.user.profile?.socialLinks?.twitter || '',
+            linkedin: data.user.profile?.socialLinks?.linkedin || '',
+            title: data.user.profile?.title || ''
+          });
+        } else {
+          setError(data.error || 'Failed to load profile');
+        }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
         setError('Failed to load profile. Please try again later.');
@@ -118,12 +122,25 @@ const ProfilePage = () => {
         }
       };
 
-      const response = await userApi.updateProfile(updateData);
-      setUser(response.user);
-      setIsEditing(false);
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
       
-      // Show success message
-      alert('Profile updated successfully!');
+      const data = await response.json();
+      
+      if (data.success && data.user) {
+        setUser(data.user);
+        setIsEditing(false);
+        
+        // Show success message
+        alert('Profile updated successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to update profile');
+      }
     } catch (err) {
       console.error('Failed to update profile:', err);
       alert('Failed to update profile. Please try again.');

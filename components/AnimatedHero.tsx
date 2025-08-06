@@ -3,24 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { 
   Code, 
   Trophy, 
   Users, 
   Zap, 
-  Star, 
   ArrowRight,
   Play,
   Crown,
-  Target,
-  Sparkles,
-  ChevronDown,
-  Menu,
-  X
+  ChevronDown
 } from 'lucide-react';
 
 interface AnimatedHeroProps {
-  onEnterBattle: () => void;
+  onEnterBattle?: () => void;
 }
 
 const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
@@ -35,8 +33,18 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
     character: string;
   }>>([]);
   const [isClient, setIsClient] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
   
   const words = ['Battle', 'Compete', 'Dominate', 'Conquer', 'Master'];
+
+  const handleGetStarted = () => {
+    if (session) {
+      router.push('/dashboard');
+    } else {
+      router.push('/auth/signup');
+    }
+  };
   
   useEffect(() => {
     setIsClient(true);
@@ -146,7 +154,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
           transition={{ duration: 1, type: "spring", stiffness: 100 }}
         >
           <motion.div
-            className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6"
+            className="inline-flex items-center justify-center w-24 h-24 rounded-2xl mb-6 relative overflow-hidden"
             whileHover={{ 
               scale: 1.1, 
               rotate: 10,
@@ -154,7 +162,13 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
             }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <Code className="w-12 h-12 text-white" />
+            <Image
+              src="/icon.png"
+              alt="CoderspaE Logo"
+              width={100}
+              height={48}
+              className="object-contain"
+            />
           </motion.div>
         </motion.div>
 
@@ -211,7 +225,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <motion.button
-            onClick={onEnterBattle}
+            onClick={handleGetStarted}
             className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl overflow-hidden shadow-2xl"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -225,7 +239,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
             />
             <span className="relative z-10 flex items-center gap-2">
               <Play className="w-5 h-5" />
-              Enter Battle Arena
+              {session ? 'Enter Dashboard' : 'Get Started'}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </span>
             <motion.div
@@ -236,16 +250,18 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
             />
           </motion.button>
 
-          <motion.button
-            className="group px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold text-lg rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" />
-              View Leaderboard
-            </span>
-          </motion.button>
+          <Link href="/leaderboard">
+            <motion.button
+              className="group px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold text-lg rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                View Leaderboard
+              </span>
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Stats */}
