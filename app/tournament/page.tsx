@@ -144,15 +144,24 @@ const TournamentPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 text-lg">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+            <h1 className="text-4xl font-bold text-white mb-4">Tournaments</h1>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 max-w-md mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-4">No Tournaments Available</h2>
+              <p className="text-gray-300 mb-6">
+                We&apos;re working on bringing you exciting tournaments. Check back soon for upcoming competitions!
+              </p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -288,8 +297,26 @@ const TournamentPage = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTournaments.map((tournament, index) => (
+          {filteredTournaments.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-16">
+              <Trophy className="h-16 w-16 text-gray-400 mb-6" />
+              <h3 className="text-2xl font-bold text-white mb-4">No Tournaments Found</h3>
+              <p className="text-gray-300 text-center max-w-md">
+                {activeTab === 'featured' 
+                  ? "No featured tournaments are available right now. Check back soon for exciting competitions!"
+                  : `No ${activeTab} tournaments are currently available. Try switching to a different category.`
+                }
+              </p>
+              <button 
+                onClick={() => setActiveTab('featured')} 
+                className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                View Featured Tournaments
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTournaments.map((tournament, index) => (
               <motion.div
                 key={tournament._id}
                 initial={{ opacity: 0, y: 20 }}
@@ -352,13 +379,6 @@ const TournamentPage = () => {
                 </div>
               </motion.div>
             ))}
-          </div>
-
-          {filteredTournaments.length === 0 && (
-            <div className="text-center py-12">
-              <Trophy className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-400 mb-2">No tournaments found</h3>
-              <p className="text-gray-500">No tournaments match the current filter. Try selecting a different category.</p>
             </div>
           )}
         </motion.section>

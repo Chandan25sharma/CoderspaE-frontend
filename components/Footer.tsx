@@ -48,7 +48,7 @@ export function Footer() {
             <h4 className="text-white font-semibold">Community</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/tournaments" className="text-gray-400 hover:text-purple-400 transition-colors">
+                <Link href="/tournament" className="text-gray-400 hover:text-purple-400 transition-colors">
                   Tournaments
                 </Link>
               </li>
