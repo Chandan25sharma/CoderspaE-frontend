@@ -15,12 +15,12 @@ const mockClient = {
   })
 };
 
-let clientPromise: Promise<any>;
-
 // For build compatibility, provide a mock client if no URI is available
+let clientPromise: Promise<MongoClient>;
+
 if (!process.env.MONGODB_URI) {
   console.warn('MONGODB_URI not found, using mock client for build');
-  clientPromise = Promise.resolve(mockClient);
+  clientPromise = Promise.resolve(mockClient as any as MongoClient);
 } else {
   const uri = process.env.MONGODB_URI;
   const options = {};

@@ -10,10 +10,10 @@ import {
 } from 'lucide-react';
 import { CodeEditor } from '../../components/CodeEditor';
 import { Timer } from '../../components/Timer';
-import { Chat } from '../../components/Chat';
+import Chat from '../../components/Chat';
 import { TypingMetrics } from '../../components/TypingMetrics';
-import { PowerUpBar } from '../../components/PowerUpBar';
-import { ConfettiCelebration } from '../../components/ConfettiCelebration';
+import PowerUpBar from '../../components/PowerUpBar';
+import ConfettiCelebration from '../../components/ConfettiCelebration';
 import GameLayout from '../../components/GameLayout';
 
 interface BattleParticipant {
@@ -69,12 +69,37 @@ export default function ModernBattlePage() {
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
   const [showChat, setShowChat] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
-  const [powerUps, setPowerUps] = useState<string[]>([]);
+  const [powerUps, setPowerUps] = useState([
+    {
+      id: 'freeze',
+      name: 'Freeze Opponent',
+      description: 'Freeze opponent for 5 seconds',
+      icon: 'freeze',
+      cost: 100,
+      cooldown: 30000,
+      currentCooldown: 0,
+      available: true,
+      owned: 2
+    },
+    {
+      id: 'reveal',
+      name: 'Peek',
+      description: 'See opponent code for 10 seconds',
+      icon: 'reveal',
+      cost: 50,
+      cooldown: 20000,
+      currentCooldown: 0,
+      available: true,
+      owned: 3
+    }
+  ]);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [coins, setCoins] = useState(500);
   const [typingMetrics, setTypingMetrics] = useState({
     wpm: 0,
     accuracy: 95,
-    streak: 0
+    timeElapsed: 0,
+    errorsCount: 0
   });
   
   const editorRef = useRef<any>(null);
@@ -219,7 +244,8 @@ export default function ModernBattlePage() {
     setTypingMetrics(prev => ({
       wpm: Math.floor(Math.random() * 20) + 60,
       accuracy: Math.floor(Math.random() * 10) + 90,
-      streak: prev.streak + 1
+      timeElapsed: prev.timeElapsed + 1,
+      errorsCount: prev.errorsCount + Math.floor(Math.random() * 2)
     }));
   };
 
@@ -250,20 +276,59 @@ export default function ModernBattlePage() {
     }
   };
 
-  const usePowerUp = (powerUpType: string) => {
-    setPowerUps(prev => prev.filter(p => p !== powerUpType));
+  const usePowerUp = (powerUpId: string) => {
+    setPowerUps(prev => prev.map(p => 
+      p.id === powerUpId 
+        ? { ...p, owned: Math.max(0, p.owned - 1), currentCooldown: p.cooldown }
+        : p
+    ));
     
-    switch (powerUpType) {
-      case 'time_boost':
-        setTimeRemaining(prev => prev + 120); // Add 2 minutes
+    switch (powerUpId) {
+      case 'freeze':
+        // Freeze opponent logic
+        console.log('Freezing opponent!');
         break;
-      case 'hint':
-        setShowAIAssistant(true);
-        break;
-      case 'code_review':
-        requestAIInsights(currentCode);
+      case 'reveal':
+        // Reveal opponent code logic
+        console.log('Revealing opponent code!');
         break;
     }
+  };
+
+  const purchasePowerUp = (powerUpId: string) => {
+    const powerUp = powerUps.find(p => p.id === powerUpId);
+    if (powerUp && coins >= powerUp.cost) {
+      setCoins(prev => prev - powerUp.cost);
+      setPowerUps(prev => prev.map(p => 
+        p.id === powerUpId ? { ...p, owned: p.owned + 1 } : p
+      ));
+    }
+  };
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [userCount, setUserCount] = useState(2);
+
+  const handleSendMessage = (message: string) => {
+    const newMessage = {
+      id: Date.now().toString(),
+      user: session?.user?.name || 'Anonymous',
+      message,
+      timestamp: new Date(),
+      type: 'message' as const
+    };
+    setMessages(prev => [...prev, newMessage]);
+  };
+
+  const handleSendEmote = (emote: string) => {
+    const newMessage = {
+      id: Date.now().toString(),
+      user: session?.user?.name || 'Anonymous',
+      message: '',
+      timestamp: new Date(),
+      type: 'emote' as const,
+      emote
+    };
+    setMessages(prev => [...prev, newMessage]);
   };
 
   if (!session) {
@@ -286,7 +351,7 @@ export default function ModernBattlePage() {
   return (
     <GameLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
-        {showCelebration && <ConfettiCelebration />}
+        {showCelebration && <ConfettiCelebration trigger={showCelebration} />}
         
         <div className="flex h-screen">
           {/* Main Battle Area */}
@@ -313,8 +378,8 @@ export default function ModernBattlePage() {
                   {/* Timer */}
                   <div className="flex items-center space-x-2">
                     <Clock className="w-5 h-5 text-yellow-400" />
-                    <Timer 
-                      timeRemaining={timeRemaining}
+                    <Timer
+                      timeLimit={timeRemaining}
                       onTimeUp={() => setBattleStatus('completed')}
                     />
                   </div>
@@ -513,7 +578,12 @@ export default function ModernBattlePage() {
           <div className="w-80 bg-gray-800/50 backdrop-blur-sm border-l border-gray-700 flex flex-col">
             <div className="p-4 border-b border-gray-700">
               <h3 className="text-lg font-bold text-white mb-3">Battle Participants</h3>
-              <TypingMetrics metrics={typingMetrics} />
+              <TypingMetrics 
+                wpm={typingMetrics.wpm}
+                accuracy={typingMetrics.accuracy}
+                timeElapsed={typingMetrics.timeElapsed}
+                errorsCount={typingMetrics.errorsCount}
+              />
             </div>
             
             <div className="flex-1 overflow-y-auto p-4">
@@ -577,7 +647,12 @@ export default function ModernBattlePage() {
 
             {/* Power-ups */}
             <div className="p-4 border-t border-gray-700">
-              <PowerUpBar powerUps={powerUps} onUsePowerUp={usePowerUp} />
+              <PowerUpBar 
+                powerUps={powerUps} 
+                coins={coins}
+                onPowerUpUse={usePowerUp}
+                onPowerUpPurchase={purchasePowerUp}
+              />
             </div>
 
             {/* Chat Toggle */}
@@ -602,7 +677,12 @@ export default function ModernBattlePage() {
               exit={{ opacity: 0, y: 100 }}
               className="fixed bottom-4 right-4 w-80 h-96 bg-gray-800/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-2xl"
             >
-              <Chat battleId={battleId || ''} />
+              <Chat 
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                onSendEmote={handleSendEmote}
+                userCount={userCount}
+              />
             </motion.div>
           )}
         </AnimatePresence>

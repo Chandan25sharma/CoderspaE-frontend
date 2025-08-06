@@ -10,13 +10,14 @@ import {
 } from 'lucide-react';
 import { AnimatedBadge } from '../../components/AnimatedBadge';
 import { XPProgressBar } from '../../components/XPProgressBar';
-import { ConfettiCelebration } from '../../components/ConfettiCelebration';
+import ConfettiCelebration from '../../components/ConfettiCelebration';
 import Image from 'next/image';
 
 interface UserProfile {
   _id: string;
   username: string;
   email: string;
+  password?: string;
   avatar?: string;
   firstName?: string;
   lastName?: string;
@@ -62,10 +63,10 @@ const EditableProfile: React.FC<EditableProfileProps> = ({ profile, onSave, onCa
         return;
       }
 
-      const updateData = { ...formData };
-      if (newPassword) {
-        updateData.password = newPassword;
-      }
+      const updateData: Partial<UserProfile> = { 
+        ...formData,
+        ...(newPassword && { password: newPassword })
+      };
 
       await onSave(updateData);
     } finally {
@@ -427,7 +428,7 @@ export default function EnhancedProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
-      {showConfetti && <ConfettiCelebration />}
+      {showConfetti && <ConfettiCelebration trigger={showConfetti} />}
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header */}
@@ -447,7 +448,11 @@ export default function EnhancedProfilePage() {
                   )}
                 </div>
                 <div className="absolute -bottom-2 -right-2">
-                  <AnimatedBadge level={profile.level} />
+                  <AnimatedBadge 
+                    type={profile.level >= 50 ? 'diamond' : profile.level >= 30 ? 'platinum' : profile.level >= 20 ? 'gold' : profile.level >= 10 ? 'silver' : 'bronze'}
+                    category="wins"
+                    level={profile.level} 
+                  />
                 </div>
               </div>
               <div>
@@ -516,7 +521,11 @@ export default function EnhancedProfilePage() {
                 </div>
                 <Star className="w-8 h-8 text-yellow-400" />
               </div>
-              <XPProgressBar currentXP={profile.xp} nextLevelXP={profile.nextLevelXP} />
+              <XPProgressBar 
+                currentXP={profile.xp} 
+                nextLevelXP={profile.nextLevelXP} 
+                level={profile.level}
+              />
               <div className="text-xs text-gray-400 mt-2">
                 {profile.nextLevelXP - profile.xp} XP to next level
               </div>

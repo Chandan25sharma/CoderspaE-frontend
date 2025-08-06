@@ -12,6 +12,7 @@ import { AnimatedBadge } from '../../components/AnimatedBadge';
 import { XPProgressBar } from '../../components/XPProgressBar';
 import { ConfettiCelebration } from '../../components/ConfettiCelebration';
 import GameLayout from '../../components/GameLayout';
+import { userApi } from '../../lib/api';
 import Image from 'next/image';
 
 interface UserProfile {

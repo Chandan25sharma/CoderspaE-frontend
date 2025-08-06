@@ -45,10 +45,17 @@ export async function connectDB() {
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (error) {
     cached.promise = null;
-    throw e;
+    console.error('MongoDB connection error:', error);
+    throw error;
   }
 
   return cached.conn;
 }
+
+// Export alias for backward compatibility
+export const connectToDatabase = connectDB;
+
+// Default export for API routes that use default import
+export default connectDB;

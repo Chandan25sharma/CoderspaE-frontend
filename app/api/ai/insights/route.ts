@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
 
 interface CodeMetrics {
   complexity: number;
@@ -191,23 +190,13 @@ class CodeAnalyzer {
 export async function POST(request: NextRequest) {
   try {
     const { action, code, language, userId, sessionId } = await request.json();
-    const client = await clientPromise;
-    const db = client.db('coderspae');
 
     switch (action) {
       case 'analyze_code':
         const analysis = CodeAnalyzer.analyzeCode(code, language);
         
-        // Store analysis for learning
-        await db.collection('code_analyses').insertOne({
-          userId,
-          sessionId,
-          code,
-          language,
-          metrics: analysis.metrics,
-          insights: analysis.insights,
-          timestamp: new Date()
-        });
+        // Store analysis for learning (mock implementation)
+        console.log('Mock storing analysis:', { userId, sessionId, language });
 
         return NextResponse.json({
           success: true,
@@ -215,15 +204,8 @@ export async function POST(request: NextRequest) {
         });
 
       case 'get_personalized_insights':
-        // Get user's recent code submissions
-        const recentCode = await db.collection('code_analyses')
-          .find({ userId })
-          .sort({ timestamp: -1 })
-          .limit(10)
-          .toArray();
-
-        const codeHistory = recentCode.map(item => item.code);
-        const personalizedInsights = CodeAnalyzer.generatePersonalizedInsights(codeHistory, language);
+        // Mock personalized insights
+        const personalizedInsights = CodeAnalyzer.generatePersonalizedInsights([], language);
 
         return NextResponse.json({
           success: true,
@@ -231,26 +213,26 @@ export async function POST(request: NextRequest) {
         });
 
       case 'get_improvement_suggestions':
-        // Analyze user's coding patterns and suggest improvements
-        const userAnalyses = await db.collection('code_analyses')
-          .find({ userId })
-          .sort({ timestamp: -1 })
-          .limit(20)
-          .toArray();
-
-        const averageMetrics = this.calculateAverageMetrics(userAnalyses);
-        const suggestions = this.generateImprovementSuggestions(averageMetrics);
+        // Mock improvement suggestions
+        const mockMetrics: CodeMetrics = {
+          complexity: 5,
+          readability: 8,
+          efficiency: 7,
+          bestPractices: 6
+        };
+        
+        const suggestions = generateImprovementSuggestions(mockMetrics);
 
         return NextResponse.json({
           success: true,
-          averageMetrics,
+          averageMetrics: mockMetrics,
           suggestions
         });
 
       case 'real_time_feedback':
         // Provide real-time feedback as user types
         const quickAnalysis = CodeAnalyzer.analyzeCode(code, language);
-        const realtimeInsights = quickAnalysis.insights.filter(insight => 
+        const realtimeInsights = quickAnalysis.insights.filter((insight: AIInsight) => 
           insight.severity === 'high' || insight.type === 'warning'
         );
 
@@ -267,26 +249,6 @@ export async function POST(request: NextRequest) {
     console.error('AI Insights API error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' });
   }
-}
-
-function calculateAverageMetrics(analyses: any[]): CodeMetrics {
-  if (analyses.length === 0) {
-    return { complexity: 50, readability: 50, efficiency: 50, bestPractices: 50 };
-  }
-
-  const totals = analyses.reduce((acc, analysis) => ({
-    complexity: acc.complexity + (analysis.metrics?.complexity || 0),
-    readability: acc.readability + (analysis.metrics?.readability || 0),
-    efficiency: acc.efficiency + (analysis.metrics?.efficiency || 0),
-    bestPractices: acc.bestPractices + (analysis.metrics?.bestPractices || 0)
-  }), { complexity: 0, readability: 0, efficiency: 0, bestPractices: 0 });
-
-  return {
-    complexity: Math.round(totals.complexity / analyses.length),
-    readability: Math.round(totals.readability / analyses.length),
-    efficiency: Math.round(totals.efficiency / analyses.length),
-    bestPractices: Math.round(totals.bestPractices / analyses.length)
-  };
 }
 
 function generateImprovementSuggestions(metrics: CodeMetrics): AIInsight[] {

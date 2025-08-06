@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 import AnimatedNavbar from '@/components/AnimatedNavbar';
 import AnimatedHero from '@/components/AnimatedHero';
 import DynamicBattleModes from '@/components/DynamicBattleModes';
 import { Footer } from '@/components/Footer';
 
 export default function HomePage() {
-  const router = useRouter();
   const [showBattleModes, setShowBattleModes] = useState(false);
 
   const handleEnterBattle = () => {

@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { Editor } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { motion } from 'framer-motion';
@@ -25,7 +25,12 @@ interface CodeEditorProps {
   height?: string;
 }
 
-export function CodeEditor({ 
+export interface CodeEditorRef {
+  getEditor: () => editor.IStandaloneCodeEditor | null;
+  focus: () => void;
+}
+
+export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({ 
   value, 
   onChange, 
   language, 
@@ -40,10 +45,16 @@ export function CodeEditor({
   revealPercentage = 100,
   spectatorMode = false,
   height = '100%'
-}: CodeEditorProps) {
+}, ref) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [copied, setCopied] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+
+  // Expose ref methods
+  useImperativeHandle(ref, () => ({
+    getEditor: () => editorRef.current,
+    focus: () => editorRef.current?.focus()
+  }), []);
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
@@ -294,4 +305,6 @@ export function CodeEditor({
       )}
     </motion.div>
   );
-}
+});
+
+CodeEditor.displayName = 'CodeEditor';

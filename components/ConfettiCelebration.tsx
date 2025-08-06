@@ -110,3 +110,5 @@ export function ConfettiCelebration({ trigger, type = 'win', onComplete }: Confe
     </motion.div>
   );
 }
+
+export default ConfettiCelebration;

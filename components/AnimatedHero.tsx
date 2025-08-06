@@ -26,8 +26,31 @@ interface AnimatedHeroProps {
 const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
   const [currentWord, setCurrentWord] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
+  const [matrixElements, setMatrixElements] = useState<Array<{
+    id: number;
+    left: string;
+    fontSize: string;
+    duration: number;
+    delay: number;
+    character: string;
+  }>>([]);
+  const [isClient, setIsClient] = useState(false);
   
   const words = ['Battle', 'Compete', 'Dominate', 'Conquer', 'Master'];
+  
+  useEffect(() => {
+    setIsClient(true);
+    // Generate random values once on client side
+    const elements = Array.from({ length: 50 }).map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      fontSize: `${Math.random() * 10 + 8}px`,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 2,
+      character: Math.random() > 0.5 ? '1' : '0'
+    }));
+    setMatrixElements(elements);
+  }, []);
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -89,26 +112,26 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
 
       {/* Matrix Rain Effect */}
       <div className="absolute inset-0 overflow-hidden opacity-10">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {isClient && matrixElements.map((element) => (
           <motion.div
-            key={i}
+            key={element.id}
             className="absolute text-green-400 font-mono text-sm"
             style={{
-              left: `${Math.random() * 100}%`,
-              fontSize: `${Math.random() * 10 + 8}px`,
+              left: element.left,
+              fontSize: element.fontSize,
             }}
             animate={{
               y: ['-100vh', '100vh'],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: Math.random() * 3 + 2,
+              duration: element.duration,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: element.delay,
               ease: "linear"
             }}
           >
-            {Math.random() > 0.5 ? '1' : '0'}
+            {element.character}
           </motion.div>
         ))}
       </div>
