@@ -44,7 +44,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSection }) =>
     
     // Check if user is admin
     if (session.user.role !== 'admin') {
-      router.push('/dashboard');
+      router.push('/profile');
       return;
     }
   }, [session, status, router]);

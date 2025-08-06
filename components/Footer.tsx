@@ -26,8 +26,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-gray-400 hover:text-purple-400 transition-colors">
-                  Dashboard
+                <Link href="/profile" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Profile
                 </Link>
               </li>
               <li>

@@ -40,7 +40,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
 
   const handleGetStarted = () => {
     if (session) {
-      router.push('/dashboard');
+      router.push('/profile');
     } else {
       router.push('/auth/signup');
     }
@@ -239,7 +239,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
             />
             <span className="relative z-10 flex items-center gap-2">
               <Play className="w-5 h-5" />
-              {session ? 'Enter Dashboard' : 'Get Started'}
+              {session ? 'View Profile' : 'Get Started'}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </span>
             <motion.div

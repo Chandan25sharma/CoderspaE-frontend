@@ -21,7 +21,7 @@ export default function SignInPage() {
         password,
         name: isSignUp ? name : '',
         isSignUp: isSignUp.toString(),
-        callbackUrl: '/dashboard',
+        callbackUrl: '/profile',
         redirect: false,
       });
 
@@ -171,7 +171,7 @@ export default function SignInPage() {
 
           {/* OAuth Providers */}
           <button
-            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+            onClick={() => signIn('google', { callbackUrl: '/profile' })}
             className="group relative w-full flex justify-center py-3 px-4 border border-purple-500/30 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
@@ -187,7 +187,7 @@ export default function SignInPage() {
 
           {/* GitHub Sign In */}
           <button
-            onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
+            onClick={() => signIn('github', { callbackUrl: '/profile' })}
             className="group relative w-full flex justify-center py-3 px-4 border border-purple-500/30 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
