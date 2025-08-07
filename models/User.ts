@@ -2,10 +2,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   _id: string;
-  username: string;
+  username?: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   image?: string;
   role: 'user' | 'admin';
   battlesWon: number;
@@ -34,8 +34,9 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>({
   username: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
     trim: true,
   },
   name: {
@@ -52,7 +53,7 @@ const UserSchema = new Schema<IUser>({
   },
   password: {
     type: String,
-    required: true,
+    required: false,
   },
   image: {
     type: String,

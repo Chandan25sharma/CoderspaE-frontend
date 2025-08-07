@@ -72,14 +72,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
             >
               <motion.div
                 className="w-10 h-10 bg-gradient-to-br rounded-xl flex items-center justify-center relative overflow-hidden"
-                whileHover={{ rotate: 10 }}
+                whileHover={{ rotate: 280 }}
                 transition={{ duration: 0.3 }}
               >
                 <Image
                   src="/icon.png"
                   alt="CoderspaE Icon"
-                  width={220}
-                  height={200}
+                  width={40}
+                  height={40}
                   className="object-contain"
                 />
               </motion.div>
@@ -142,73 +142,32 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
           <div className="flex items-center space-x-4">
             {session ? (
               <div className="relative">
-                <motion.button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-2xl p-2 pr-4 hover:bg-white/20 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-white font-medium hidden sm:block">
-                    {session.user?.name || 'User'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
-                </motion.button>
+               <div className="flex items-center space-x-3">
+  {/* Profile Icon */}
+  <Link href="/profile">
+    <motion.div
+      className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center hover:scale-110 transition"
+      whileTap={{ scale: 0.95 }}
+    >
+      <User className="w-5 h-5 text-white" />
+    </motion.div>
+  </Link>
 
-                {/* Profile Dropdown */}
-                <AnimatePresence>
-                  {isProfileOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      className="absolute top-full right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
-                    >
-                      <div className="p-2">
-                        <Link href="/profile">
-                          <motion.div
-                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors"
-                            whileHover={{ x: 5 }}
-                          >
-                            <User className="w-5 h-5 text-gray-400" />
-                            <span className="text-white">Profile</span>
-                          </motion.div>
-                        </Link>
-                        <Link href="/settings">
-                          <motion.div
-                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors"
-                            whileHover={{ x: 5 }}
-                          >
-                            <Settings className="w-5 h-5 text-gray-400" />
-                            <span className="text-white">Settings</span>
-                          </motion.div>
-                        </Link>
-                        <motion.button
-                          onClick={() => signOut()}
-                          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-red-500/20 cursor-pointer transition-colors"
-                          whileHover={{ x: 5 }}
-                        >
-                          <LogOut className="w-5 h-5 text-red-400" />
-                          <span className="text-red-400">Sign Out</span>
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+  {/* Logout Button */}
+  <motion.button
+    onClick={() => signOut()}
+    className="w-10 h-10 bg-white/10 hover:bg-red-500/20 rounded-xl flex items-center justify-center transition"
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.95 }}
+  >
+    <LogOut className="w-5 h-5 text-red-400" />
+  </motion.button>
+</div>
+
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link href="/auth/signin">
-                  <motion.button
-                    className="px-6 py-2 text-gray-300 hover:text-white transition-colors font-medium"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Sign In
-                  </motion.button>
-                </Link>
+                
                 <Link href="/auth/signup">
                   <motion.button
                     className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"

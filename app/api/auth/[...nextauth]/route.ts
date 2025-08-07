@@ -61,12 +61,23 @@ const handler = NextAuth({
             throw new Error('User already exists');
           }
           
+          // Generate unique username
+          const baseUsername = credentials.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+          let username = baseUsername;
+          let counter = 1;
+          
+          while (await User.findOne({ username })) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+          }
+          
           // Hash password
           const hashedPassword = await bcrypt.hash(credentials.password, 12);
           
           const newUser = await User.create({
             email: credentials.email,
             name: credentials.name || credentials.email.split('@')[0],
+            username: username,
             password: hashedPassword,
             isVerified: true,
             role: 'user'
@@ -98,6 +109,21 @@ const handler = NextAuth({
           throw new Error('Please sign in with the method you used to create this account');
         }
 
+        // Ensure user has username (for existing users)
+        if (!user.username) {
+          const baseUsername = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+          let username = baseUsername;
+          let counter = 1;
+          
+          while (await User.findOne({ username })) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+          }
+          
+          user.username = username;
+          await user.save();
+        }
+
         return {
           id: user._id.toString(),
           email: user.email,
@@ -118,9 +144,21 @@ const handler = NextAuth({
         existingUser = await User.findOne({ email: user.email });
         
         if (!existingUser) {
+          // Generate username from email for OAuth users
+          const baseUsername = user.email?.split('@')[0] || user.name?.replace(/\s+/g, '').toLowerCase();
+          let username = baseUsername;
+          let counter = 1;
+          
+          // Ensure username is unique
+          while (await User.findOne({ username })) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+          }
+          
           existingUser = await User.create({
             email: user.email,
             name: user.name,
+            username: username,
             image: user.image,
             googleProfile: {
               id: account.providerAccountId,
@@ -135,6 +173,20 @@ const handler = NextAuth({
           existingUser.loginCount += 1;
           existingUser.image = user.image || existingUser.image;
           existingUser.name = user.name || existingUser.name;
+          
+          // Add username if missing for existing users
+          if (!existingUser.username) {
+            const baseUsername = user.email?.split('@')[0] || user.name?.replace(/\s+/g, '').toLowerCase();
+            let username = baseUsername;
+            let counter = 1;
+            
+            while (await User.findOne({ username })) {
+              username = `${baseUsername}${counter}`;
+              counter++;
+            }
+            existingUser.username = username;
+          }
+          
           if (!existingUser.googleProfile?.id) {
             existingUser.googleProfile = {
               id: account.providerAccountId,
@@ -160,14 +212,27 @@ const handler = NextAuth({
         existingUser = await User.findOne({ email: user.email });
         
         if (!existingUser) {
+          // Generate username from GitHub profile or email
+          const githubUsername = (profile as { login?: string })?.login;
+          const baseUsername = githubUsername || user.email?.split('@')[0] || user.name?.replace(/\s+/g, '').toLowerCase();
+          let username = baseUsername;
+          let counter = 1;
+          
+          // Ensure username is unique
+          while (await User.findOne({ username })) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+          }
+          
           existingUser = await User.create({
             email: user.email,
             name: user.name,
+            username: username,
             image: user.image,
             githubProfile: {
               id: account.providerAccountId,
-              username: (profile as { login?: string })?.login || user.name,
-              profileUrl: `https://github.com/${(profile as { login?: string })?.login || user.name}`
+              username: githubUsername || user.name,
+              profileUrl: `https://github.com/${githubUsername || user.name}`
             },
             isVerified: true,
             loginCount: 1,
@@ -178,6 +243,21 @@ const handler = NextAuth({
           existingUser.loginCount += 1;
           existingUser.image = user.image || existingUser.image;
           existingUser.name = user.name || existingUser.name;
+          
+          // Add username if missing for existing users
+          if (!existingUser.username) {
+            const githubUsername = (profile as { login?: string })?.login;
+            const baseUsername = githubUsername || user.email?.split('@')[0] || user.name?.replace(/\s+/g, '').toLowerCase();
+            let username = baseUsername;
+            let counter = 1;
+            
+            while (await User.findOne({ username })) {
+              username = `${baseUsername}${counter}`;
+              counter++;
+            }
+            existingUser.username = username;
+          }
+          
           if (!existingUser.githubProfile?.id) {
             existingUser.githubProfile = {
               id: account.providerAccountId,

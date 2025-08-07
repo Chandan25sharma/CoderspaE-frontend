@@ -45,19 +45,24 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
       router.push('/auth/signup');
     }
   };
+  function randomChar() {
+  const chars = "アァイィウエカキクサシスセタチツナニハヒフヘホマミムメモラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return chars[Math.floor(Math.random() * chars.length)];
+}
+
   
   useEffect(() => {
     setIsClient(true);
     // Generate random values once on client side
-    const elements = Array.from({ length: 50 }).map((_, i) => ({
+    const matrixElements = Array.from({ length: 150 }, (_, i) => ({ 
       id: i,
       left: `${Math.random() * 100}%`,
-      fontSize: `${Math.random() * 10 + 8}px`,
-      duration: Math.random() * 3 + 2,
-      delay: Math.random() * 2,
-      character: Math.random() > 0.5 ? '1' : '0'
+      fontSize: `${Math.random() * 1.5 + 0.5}rem`,
+      duration: Math.random() * 10 + 5,
+      delay: Math.random() * 5,
+      character: randomChar()
     }));
-    setMatrixElements(elements);
+    setMatrixElements(matrixElements);
   }, []);
   
   useEffect(() => {
@@ -119,27 +124,29 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
       </div>
 
       {/* Matrix Rain Effect */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        {isClient && matrixElements.map((element) => (
+       <div className="absolute inset-0 overflow-hidden opacity-40 pointer-events-none z-0">
+        {isClient && matrixElements.map((matrixElement) => (
           <motion.div
-            key={element.id}
-            className="absolute text-green-400 font-mono text-sm"
+            key={matrixElement.id}
+            className="absolute font-mono text-green-400 text-sm [text-shadow:0_0_6px_#00FF00,0_0_10px_#00FF00]"
+
             style={{
-              left: element.left,
-              fontSize: element.fontSize,
+              left: matrixElement.left,
+              fontSize: matrixElement.fontSize,
             }}
-            animate={{
-              y: ['-100vh', '100vh'],
-              opacity: [0, 1, 0],
+           animate={{
+            y: ['-100vh', '100vh'],
+            opacity: [0, 1, 0],
+            rotate: [0, 0, 360], // optional subtle spin
             }}
             transition={{
-              duration: element.duration,
+              duration: matrixElement.duration,
               repeat: Infinity,
-              delay: element.delay,
+              delay: matrixElement.delay,
               ease: "linear"
             }}
           >
-            {element.character}
+            {matrixElement.character}
           </motion.div>
         ))}
       </div>
@@ -154,10 +161,10 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
           transition={{ duration: 1, type: "spring", stiffness: 100 }}
         >
           <motion.div
-            className="inline-flex items-center justify-center w-24 h-24 rounded-2xl mb-6 relative overflow-hidden"
+            className="inline-flex items-center justify-center w-34 h-34 rounded-xl mb-6 relative overflow-hidden"
             whileHover={{ 
               scale: 1.1, 
-              rotate: 10,
+              rotate: 330,
               boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)"
             }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -190,7 +197,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
               initial={{ opacity: 0, y: 50, rotateX: -90 }}
               animate={{ 
                 opacity: isTyping ? 1 : 0, 
-                y: 0, 
+                y: 29, 
                 rotateX: 0 
               }}
               exit={{ opacity: 0, y: -50, rotateX: 90 }}
