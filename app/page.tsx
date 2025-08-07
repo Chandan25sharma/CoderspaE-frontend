@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import AnimatedNavbar from '@/components/AnimatedNavbar';
 import AnimatedHero from '@/components/AnimatedHero';
 import DynamicBattleModes from '@/components/DynamicBattleModes';
@@ -33,6 +34,84 @@ export default function HomePage() {
           >
             <AnimatedHero onEnterBattle={handleEnterBattle} />
             
+            {/* Company Description Section */}
+            <motion.section 
+              className="py-20 px-6 bg-gray-900/50"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <div className="container mx-auto max-w-4xl">
+                <motion.div 
+                  className="text-center"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-8">
+                    About CoderspaE
+                  </h2>
+                  <div className="text-lg text-gray-300 space-y-6 text-left">
+                    <p>
+                      <strong className="text-white">CoderspaE</strong> is the world's premier international virtual code battle arena platform, 
+                      designed to bring together programmers, developers, and coding enthusiasts from around the globe. 
+                      Our mission is to create an engaging, competitive environment where coders can improve their skills, 
+                      compete in real-time battles, and connect with a worldwide community of like-minded individuals.
+                    </p>
+                    
+                    <h3 className="text-2xl font-bold text-white mt-8 mb-4">What We Offer:</h3>
+                    <ul className="space-y-3 text-gray-300">
+                      <li className="flex items-start">
+                        <span className="text-blue-400 mr-3">•</span>
+                        <span><strong>Real-time Coding Battles:</strong> Compete with developers worldwide in live programming challenges</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-400 mr-3">•</span>
+                        <span><strong>Team Competitions:</strong> Form teams and participate in multiplayer tournaments</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-400 mr-3">•</span>
+                        <span><strong>Practice Challenges:</strong> Sharpen your skills with our comprehensive challenge library</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-400 mr-3">•</span>
+                        <span><strong>AI-Powered Analytics:</strong> Get personalized insights and improvement recommendations</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-400 mr-3">•</span>
+                        <span><strong>Global Leaderboards:</strong> Track your progress and compete for top rankings</span>
+                      </li>
+                    </ul>
+
+                    <h3 className="text-2xl font-bold text-white mt-8 mb-4">Data Usage & Privacy:</h3>
+                    <p>
+                      We collect and use your data solely to provide and improve our coding platform services. 
+                      This includes your coding performance metrics, battle statistics, and platform usage data 
+                      to enhance your learning experience and provide personalized recommendations. 
+                      We never share your personal information with third parties without your explicit consent.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
+                      <Link 
+                        href="/privacy" 
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-center"
+                      >
+                        Read Our Privacy Policy
+                      </Link>
+                      <Link 
+                        href="/terms" 
+                        className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-center"
+                      >
+                        Terms of Service
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.section>
+            
             {/* Features Section */}
             <motion.section 
               className="py-20 px-6"
@@ -50,7 +129,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                 >
                   <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-6">
-                    Why Choose CoderspaE?
+                    Platform Features
                   </h2>
                   <p className="text-xl text-gray-300 max-w-3xl mx-auto">
                     Experience the future of competitive programming with our cutting-edge platform

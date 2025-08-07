@@ -1,263 +1,399 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { Users, Plus, Crown, Trophy, Target, Star, Search } from 'lucide-react';
-import { AnimatedBadge } from '@/components/AnimatedBadge';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { 
+  Users, 
+  Plus, 
+  Crown, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap,
+  Search
+} from 'lucide-react';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: 'leader' | 'member';
+  location: string;
+  occupation: 'student' | 'working';
+  institution: string;
+  joinedAt: string;
+}
 
 interface Team {
   id: string;
   name: string;
-  members: Array<{
-    id: string;
-    name: string;
-    role: 'leader' | 'member';
-    rating: number;
-    avatar?: string;
-  }>;
-  wins: number;
-  losses: number;
-  rating: number;
   description: string;
-  isJoinable: boolean;
+  maxMembers: number;
+  currentMembers: number;
+  leader: TeamMember;
+  members: TeamMember[];
+  location: string;
+  createdAt: string;
+  isPrivate: boolean;
 }
 
-const mockTeams: Team[] = [
-  {
-    id: '1',
-    name: 'Code Crushers',
-    members: [
-      { id: '1', name: 'Alex Chen', role: 'leader', rating: 1850 },
-      { id: '2', name: 'Sarah Kim', role: 'member', rating: 1720 },
-      { id: '3', name: 'Mike Johnson', role: 'member', rating: 1680 },
-    ],
-    wins: 45,
-    losses: 12,
-    rating: 1750,
-    description: 'Elite team specializing in algorithmic challenges',
-    isJoinable: false,
-  },
-  {
-    id: '2',
-    name: 'Binary Bombers',
-    members: [
-      { id: '4', name: 'Emma Wilson', role: 'leader', rating: 1650 },
-      { id: '5', name: 'David Lee', role: 'member', rating: 1580 },
-    ],
-    wins: 28,
-    losses: 8,
-    rating: 1615,
-    description: 'Fast-paced team focused on speed coding',
-    isJoinable: true,
-  },
-];
-
 export default function TeamsPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const { data: session } = useSession();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
-  const [newTeamDescription, setNewTeamDescription] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredTeams = mockTeams.filter(team =>
-    team.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    description: '',
+    maxMembers: 4,
+    location: '',
+    occupation: 'student' as 'student' | 'working',
+    institution: '',
+    isPrivate: false
+  });
 
-  const handleCreateTeam = () => {
-    // TODO: Implement team creation logic
-    console.log('Creating team:', { name: newTeamName, description: newTeamDescription });
-    setShowCreateModal(false);
-    setNewTeamName('');
-    setNewTeamDescription('');
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  const fetchTeams = async () => {
+    try {
+      const mockTeams: Team[] = [
+        {
+          id: '1',
+          name: 'Code Warriors',
+          description: 'Competitive programming team focused on algorithms and data structures',
+          maxMembers: 4,
+          currentMembers: 3,
+          leader: {
+            id: '1',
+            name: 'John Doe',
+            email: 'john@example.com',
+            role: 'leader',
+            location: 'San Francisco, CA',
+            occupation: 'working',
+            institution: 'Google',
+            joinedAt: '2024-01-15'
+          },
+          members: [],
+          location: 'San Francisco, CA',
+          createdAt: '2024-01-15',
+          isPrivate: false
+        }
+      ];
+      setTeams(mockTeams);
+    } catch (error) {
+      console.error('Failed to fetch teams:', error);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          className="text-center mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Users className="h-12 w-12 text-neon-blue" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-neon-blue to-neon-green bg-clip-text text-transparent">
-              Teams Arena
-            </h1>
-          </div>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Join forces with other developers or create your own team to dominate the coding battlefield
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!session) {
+      alert('Please sign in to create a team');
+      return;
+    }
+
+    try {
+      const teamData = {
+        ...createForm,
+        leaderId: session.user?.email,
+        leaderName: session.user?.name,
+        leaderEmail: session.user?.email
+      };
+
+      console.log('Creating team:', teamData);
+      
+      setShowCreateModal(false);
+      setCreateForm({
+        name: '',
+        description: '',
+        maxMembers: 4,
+        location: '',
+        occupation: 'student',
+        institution: '',
+        isPrivate: false
+      });
+      
+      fetchTeams();
+      alert('Team created successfully!');
+    } catch (error) {
+      console.error('Failed to create team:', error);
+      alert('Failed to create team. Please try again.');
+    }
+  };
+
+  const handleJoinTeam = async (teamId: string) => {
+    if (!session) {
+      alert('Please sign in to join a team');
+      return;
+    }
+
+    try {
+      console.log('Sending join request for team:', teamId);
+      alert('Join request sent successfully!');
+    } catch (error) {
+      console.error('Failed to send join request:', error);
+      alert('Failed to send join request. Please try again.');
+    }
+  };
+
+  const filteredTeams = teams.filter(team =>
+    team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    team.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <Users className="h-16 w-16 text-blue-400 mx-auto mb-6" />
+          <h1 className="text-3xl font-bold text-white mb-4">Join Teams</h1>
+          <p className="text-gray-300 mb-8">
+            Sign in to create teams, join battles, and collaborate with fellow coders worldwide.
           </p>
-        </motion.div>
+          <div className="space-y-4">
+            <Link href="/auth/signin" className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+              Sign In
+            </Link>
+            <Link href="/auth/signup" className="block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+              Create Account
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-20">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center mb-6"
+          >
+            <Users className="h-16 w-16 text-blue-400 mr-4" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 bg-clip-text text-transparent">
+              Teams
+            </h1>
+          </motion.div>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            Join forces with fellow coders, compete in team battles, and achieve greatness together.
+          </p>
+        </div>
 
         {/* Search and Create */}
-        <motion.div
-          className="flex flex-col md:flex-row gap-4 mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search teams..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-cyber-gray border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-blue focus:ring-2 focus:ring-neon-blue/20 transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
             />
           </div>
-          <motion.button
+          <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-neon-green to-neon-blue text-white font-semibold rounded-xl shadow-lg hover:shadow-neon-green/50 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
           >
-            <Plus className="h-5 w-5 inline mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Create Team
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
 
         {/* Teams Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTeams.map((team, index) => (
             <motion.div
               key={team.id}
-              className="bg-cyber-gray rounded-2xl p-6 border border-gray-700 hover:border-neon-blue/50 transition-all"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
+              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 hover:border-blue-500/50 transition-all duration-300"
             >
-              {/* Team Header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-white">{team.name}</h3>
-                <div className="flex items-center gap-2">
-                  <AnimatedBadge 
-                    type={team.rating > 1700 ? 'gold' : team.rating > 1500 ? 'silver' : 'bronze'}
-                    category="wins"
-                    level={Math.floor(team.rating / 100)}
-                    size="sm"
-                  />
+                <div className="flex items-center text-blue-400">
+                  <Crown className="w-5 h-5 mr-1" />
+                  <span className="text-sm">Leader</span>
+                </div>
+              </div>
+              
+              <p className="text-gray-300 text-sm mb-4 line-clamp-2">{team.description}</p>
+              
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center text-gray-400 text-sm">
+                  <Users className="w-4 h-4 mr-2" />
+                  <span>{team.currentMembers}/{team.maxMembers} members</span>
+                </div>
+                <div className="flex items-center text-gray-400 text-sm">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span>{team.location}</span>
+                </div>
+                <div className="flex items-center text-gray-400 text-sm">
+                  {team.leader.occupation === 'working' ? (
+                    <Briefcase className="w-4 h-4 mr-2" />
+                  ) : (
+                    <GraduationCap className="w-4 h-4 mr-2" />
+                  )}
+                  <span>{team.leader.institution}</span>
                 </div>
               </div>
 
-              {/* Team Stats */}
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-green">{team.wins}</div>
-                  <div className="text-xs text-gray-400">Wins</div>
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-gray-500">
+                  Led by {team.leader.name}
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-red">{team.losses}</div>
-                  <div className="text-xs text-gray-400">Losses</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-yellow">{team.rating}</div>
-                  <div className="text-xs text-gray-400">Rating</div>
-                </div>
+                <button
+                  onClick={() => handleJoinTeam(team.id)}
+                  disabled={team.currentMembers >= team.maxMembers}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    team.currentMembers >= team.maxMembers
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
+                >
+                  {team.currentMembers >= team.maxMembers ? 'Full' : 'Join Team'}
+                </button>
               </div>
-
-              {/* Description */}
-              <p className="text-gray-300 text-sm mb-4">{team.description}</p>
-
-              {/* Members */}
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Members ({team.members.length}/4)</h4>
-                <div className="space-y-2">
-                  {team.members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {member.role === 'leader' && <Crown className="h-4 w-4 text-neon-yellow" />}
-                        <span className="text-white text-sm">{member.name}</span>
-                      </div>
-                      <span className="text-gray-400 text-xs">{member.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <motion.button
-                className={`w-full py-3 rounded-xl font-semibold transition-all ${
-                  team.isJoinable
-                    ? 'bg-neon-green text-cyber-dark hover:bg-green-400'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
-                disabled={!team.isJoinable}
-                whileHover={team.isJoinable ? { scale: 1.02 } : {}}
-                whileTap={team.isJoinable ? { scale: 0.98 } : {}}
-              >
-                {team.isJoinable ? 'Request to Join' : 'Team Full'}
-              </motion.button>
             </motion.div>
           ))}
         </div>
+      </div>
 
-        {/* Create Team Modal */}
+      {/* Create Team Modal */}
+      <AnimatePresence>
         {showCreateModal && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           >
             <motion.div
-              className="bg-cyber-gray rounded-2xl p-8 max-w-md w-full mx-4 border border-gray-700"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-800 rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto"
             >
               <h2 className="text-2xl font-bold text-white mb-6">Create New Team</h2>
               
-              <div className="space-y-4">
+              <form onSubmit={handleCreateTeam} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Team Name
+                  <label className="block text-gray-300 mb-2">Team Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={createForm.name}
+                    onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none"
+                    placeholder="Enter team name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">Description</label>
+                  <textarea
+                    required
+                    value={createForm.description}
+                    onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none h-24 resize-none"
+                    placeholder="Describe your team"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">Max Team Members</label>
+                  <select
+                    value={createForm.maxMembers}
+                    onChange={(e) => setCreateForm({...createForm, maxMembers: parseInt(e.target.value)})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none"
+                  >
+                    {[2, 3, 4, 5, 6].map(num => (
+                      <option key={num} value={num}>{num} members</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">Location</label>
+                  <input
+                    type="text"
+                    required
+                    value={createForm.location}
+                    onChange={(e) => setCreateForm({...createForm, location: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none"
+                    placeholder="e.g., San Francisco, CA"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">Occupation</label>
+                  <select
+                    value={createForm.occupation}
+                    onChange={(e) => setCreateForm({...createForm, occupation: e.target.value as 'student' | 'working'})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="student">Student</option>
+                    <option value="working">Working Professional</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">
+                    {createForm.occupation === 'student' ? 'School/University' : 'Company'}
                   </label>
                   <input
                     type="text"
-                    value={newTeamName}
-                    onChange={(e) => setNewTeamName(e.target.value)}
-                    className="w-full px-4 py-3 bg-cyber-light border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-blue focus:ring-2 focus:ring-neon-blue/20 transition-all"
-                    placeholder="Enter team name..."
+                    required
+                    value={createForm.institution}
+                    onChange={(e) => setCreateForm({...createForm, institution: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:border-blue-500 focus:outline-none"
+                    placeholder={createForm.occupation === 'student' ? 'Enter school name' : 'Enter company name'}
                   />
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={newTeamDescription}
-                    onChange={(e) => setNewTeamDescription(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-cyber-light border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-neon-blue focus:ring-2 focus:ring-neon-blue/20 transition-all resize-none"
-                    placeholder="Describe your team..."
-                  />
-                </div>
-              </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateTeam}
-                  disabled={!newTeamName.trim()}
-                  className="flex-1 py-3 bg-neon-green text-cyber-dark rounded-xl hover:bg-green-400 transition-colors disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-                >
-                  Create Team
-                </button>
-              </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isPrivate"
+                    checked={createForm.isPrivate}
+                    onChange={(e) => setCreateForm({...createForm, isPrivate: e.target.checked})}
+                    className="mr-3 w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="isPrivate" className="text-gray-300">
+                    Private Team (invite only)
+                  </label>
+                </div>
+
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
+                  >
+                    Create Team
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

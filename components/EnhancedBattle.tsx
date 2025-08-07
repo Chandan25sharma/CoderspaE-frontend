@@ -52,7 +52,7 @@ export default function EnhancedBattle({ userId, userName, isPremium }: Enhanced
   useEffect(() => {
     if (!userId) return;
 
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000');
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://coderspae.com');
     setSocket(newSocket);
 
     // Listen for match found

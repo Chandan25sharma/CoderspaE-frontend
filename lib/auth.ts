@@ -65,9 +65,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to profile page after sign in
+      // Redirect to home page after sign in
       if (url === baseUrl || url === `${baseUrl}/` || url === `${baseUrl}/auth/signin`) {
-        return `${baseUrl}/profile`;
+        return `${baseUrl}/`;
       }
       return url.startsWith(baseUrl) ? url : baseUrl;
     }
