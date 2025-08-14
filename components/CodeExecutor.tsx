@@ -85,6 +85,7 @@ export function CodeExecutor({
         });
       }
     } catch (error) {
+      console.error('Code execution error:', error);
       setResult({
         success: false,
         output: '',

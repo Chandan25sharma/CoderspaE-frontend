@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useState } from 'react';
-import { Menu, X, Swords, Trophy, Users, LogOut, User, Shield, Target, Brain, Zap, Eye, Scroll } from 'lucide-react';
+import { Menu, X, Swords, Trophy, Users, LogOut, User, Shield, Target, Brain, Zap, Scroll } from 'lucide-react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
 export function Navbar() {
@@ -15,7 +15,6 @@ export function Navbar() {
     { href: '/code-arena', icon: Zap, label: 'Code Arena', description: 'Power-up enhanced battles' },
     { href: '/attack-defend', icon: Shield, label: 'Attack & Defend', description: 'Break code vs test cases' },
     { href: '/narrative-mode', icon: Scroll, label: 'Narrative Mode', description: 'Story-driven challenges' },
-    { href: '/live-viewer', icon: Eye, label: 'Live Viewer', description: 'Spectate and vote on battles' },
   ];
 
   return (
@@ -99,7 +98,7 @@ export function Navbar() {
                 <>
                   <Link
                     href="/profile"
-                    className="text-gray-300 hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
+                    className="text-gray-300 hover:text-neon-blue px-3 py-2 rounded-full text-sm font-medium transition-colors flex items-center space-x-1"
                   >
                     <User className="h-4 w-4" />
                     <span>Profile</span>

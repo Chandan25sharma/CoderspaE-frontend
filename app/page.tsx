@@ -6,6 +6,7 @@ import Link from 'next/link';
 import AnimatedNavbar from '@/components/AnimatedNavbar';
 import AnimatedHero from '@/components/AnimatedHero';
 import DynamicBattleModes from '@/components/DynamicBattleModes';
+import LiveBattles from '@/components/LiveBattles';
 import { Footer } from '@/components/Footer';
 
 export default function HomePage() {
@@ -20,7 +21,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-950 to-black">
       <AnimatedNavbar />
       
       <AnimatePresence mode="wait">
@@ -36,7 +37,7 @@ export default function HomePage() {
             
             {/* Company Description Section */}
             <motion.section 
-              className="py-20 px-6 bg-gray-900/50"
+              className="py-20 px-6 bg-gray-950"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -50,7 +51,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-8">
+                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-950 to-blue-900 bg-clip-text text-transparent mb-8">
                     About CoderspaE
                   </h2>
                   <div className="text-lg text-gray-300 space-y-6 text-left">
@@ -61,7 +62,7 @@ export default function HomePage() {
                       compete in real-time battles, and connect with a worldwide community of like-minded individuals.
                     </p>
                     
-                    <h3 className="text-2xl font-bold text-white mt-8 mb-4">What We Offer:</h3>
+                    <h3 className="text-xl font-bold text-white mt-8 mb-4">What We Offer:</h3>
                     <ul className="space-y-3 text-gray-300">
                       <li className="flex items-start">
                         <span className="text-blue-400 mr-3">•</span>
@@ -85,7 +86,7 @@ export default function HomePage() {
                       </li>
                     </ul>
 
-                    <h3 className="text-2xl font-bold text-white mt-8 mb-4">Data Usage & Privacy:</h3>
+                    <h3 className="text-xl font-bold text-white mt-8 mb-4">Data Usage & Privacy:</h3>
                     <p>
                       We collect and use your data solely to provide and improve our coding platform services. 
                       This includes your coding performance metrics, battle statistics, and platform usage data 
@@ -96,13 +97,13 @@ export default function HomePage() {
                     <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
                       <Link 
                         href="/privacy" 
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-center"
+                        className="px-6 py-3 bg-gradient-to-r from-blue-800 to-black hover:bg-gradient-to-r hover:from-black hover:to-blue-800 text-white rounded-lg transition-colors text-center"
                       >
                         Read Our Privacy Policy
                       </Link>
                       <Link 
                         href="/terms" 
-                        className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-center"
+                        className="px-12 py-4 bg-gradient-to-r from-gray-950 to-gray-800 text-white font-bold text-lg rounded-2xl hover:from-gray-700 hover:to-gray-950 transition-all duration-300 shadow-2xl text-center"
                       >
                         Terms of Service
                       </Link>
@@ -128,7 +129,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-6">
+                  <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-800 to-blue-950 bg-clip-text text-transparent mb-6">
                     Platform Features
                   </h2>
                   <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -203,6 +204,34 @@ export default function HomePage() {
               </div>
             </motion.section>
 
+            {/* Live Battles Section */}
+            <motion.section 
+              className="py-20 px-6 bg-gray-950"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <div className="container mx-auto">
+                <motion.div 
+                  className="text-center mb-12"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <h2 className="text-4xl md:text-5xl font-bold bg-white bg-clip-text text-transparent mb-6">
+                    Online Matches
+                  </h2>
+                  <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Watch live coding battles happening right now or join as a spectator
+                  </p>
+                </motion.div>
+                
+                <LiveBattles />
+              </div>
+            </motion.section>
+
             {/* CTA Section */}
             <motion.section 
               className="py-20 px-6"
@@ -213,7 +242,7 @@ export default function HomePage() {
             >
               <div className="container mx-auto text-center">
                 <motion.div
-                  className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10 rounded-3xl p-12 max-w-4xl mx-auto"
+                  className="bg-gradient-to-r from-blue-950 to-black backdrop-blur-sm border border-white/10 rounded-3xl p-12 max-w-4xl mx-auto"
                   initial={{ scale: 0.9, opacity: 0 }}
                   whileInView={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.6 }}
@@ -227,7 +256,7 @@ export default function HomePage() {
                   </p>
                   <motion.button
                     onClick={handleEnterBattle}
-                    className="px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl"
+                    className="px-12 py-4 bg-gradient-to-r from-gray-950 to-gray-800 text-white font-bold text-lg rounded-2xl hover:from-gray-700 hover:to-gray-950 transition-all duration-300 shadow-2xl"
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >

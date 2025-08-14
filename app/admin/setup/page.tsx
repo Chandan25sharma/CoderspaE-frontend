@@ -7,8 +7,10 @@ import { Shield, Key, User, CheckCircle, XCircle } from 'lucide-react';
 export default function AdminSetupPage() {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    adminSecret: ''
   });
+  const [useOAuthMethod, setUseOAuthMethod] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
@@ -19,23 +21,41 @@ export default function AdminSetupPage() {
     setMessage('');
 
     try {
-      const response = await fetch('/api/admin/make-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          makeAdmin: true
-        }),
-      });
+      let response;
+      
+      if (useOAuthMethod) {
+        // Use OAuth admin promotion for users without passwords
+        response = await fetch('/api/admin/promote-oauth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            targetEmail: formData.email,
+            adminSecret: formData.adminSecret
+          }),
+        });
+      } else {
+        // Use traditional password verification
+        response = await fetch('/api/admin/make-admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            makeAdmin: true
+          }),
+        });
+      }
 
       const result = await response.json();
 
       if (response.ok) {
         setSuccess(true);
         setMessage('User has been successfully granted admin privileges!');
-        setFormData({ email: '', password: '' });
+        setFormData({ email: '', password: '', adminSecret: '' });
       } else {
         setSuccess(false);
         setMessage(result.error || 'Failed to grant admin privileges');
@@ -43,6 +63,7 @@ export default function AdminSetupPage() {
     } catch (error) {
       setSuccess(false);
       setMessage('Network error. Please try again.');
+      console.error('Admin setup error:', error);
     } finally {
       setLoading(false);
     }
@@ -64,6 +85,41 @@ export default function AdminSetupPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Method Selection */}
+          <div className="mb-6">
+            <label className="block text-gray-300 mb-3 font-medium">User Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setUseOAuthMethod(false)}
+                className={`p-3 rounded-xl text-sm font-medium transition-colors ${
+                  !useOAuthMethod
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                Password User
+              </button>
+              <button
+                type="button"
+                onClick={() => setUseOAuthMethod(true)}
+                className={`p-3 rounded-xl text-sm font-medium transition-colors ${
+                  useOAuthMethod
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                OAuth User
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              {useOAuthMethod 
+                ? 'For users who signed up with Google/GitHub'
+                : 'For users who created accounts with email/password'
+              }
+            </p>
+          </div>
+
           <div>
             <label className="block text-gray-300 mb-2 font-medium">User Email</label>
             <div className="relative">
@@ -79,20 +135,40 @@ export default function AdminSetupPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-gray-300 mb-2 font-medium">User Password</label>
-            <div className="relative">
-              <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="password"
-                required
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
-                placeholder="Enter user password"
-              />
+          {!useOAuthMethod ? (
+            <div>
+              <label className="block text-gray-300 mb-2 font-medium">User Password</label>
+              <div className="relative">
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
+                  placeholder="Enter user password"
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              <label className="block text-gray-300 mb-2 font-medium">Admin Secret</label>
+              <div className="relative">
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="password"
+                  required
+                  value={formData.adminSecret}
+                  onChange={(e) => setFormData({ ...formData, adminSecret: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
+                  placeholder="Enter admin secret key"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Contact system administrator for the admin secret key
+              </p>
+            </div>
+          )}
 
           {message && (
             <motion.div
@@ -137,6 +213,11 @@ export default function AdminSetupPage() {
             <div className="text-sm text-yellow-400">
               <strong>Warning:</strong> This will grant full admin access to the specified user. 
               Only use this for trusted individuals who need admin privileges.
+              {useOAuthMethod && (
+                <div className="mt-2">
+                  <strong>OAuth Method:</strong> Requires the admin secret key for security.
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -25,6 +25,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user has a password (non-OAuth user)
+    if (!existingUser.password) {
+      return NextResponse.json(
+        { error: 'This user was created via OAuth (Google/GitHub) and cannot be verified with a password. Admin privileges must be granted manually in the database.' },
+        { status: 400 }
+      );
+    }
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, existingUser.password);
     if (!isPasswordValid) {

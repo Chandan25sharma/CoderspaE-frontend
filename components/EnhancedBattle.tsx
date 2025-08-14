@@ -119,11 +119,34 @@ export default function EnhancedBattle({ userId, userName, isPremium }: Enhanced
   useEffect(() => {
     const fetchLiveBattles = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/battles/live/spectate`);
+        const response = await fetch('/api/battles?status=in_progress');
+        if (!response.ok) throw new Error('Failed to fetch live battles');
+        
         const data = await response.json();
-        setLiveBattles(data.battles || []);
+        if (data.success) {
+          setLiveBattles(data.data || []);
+        }
       } catch (error) {
         console.error('Error fetching live battles:', error);
+        // Set mock data on error
+        setLiveBattles([
+          {
+            _id: '1',
+            challengeTitle: 'Two Sum Challenge',
+            battleType: 'quick-dual',
+            player1: { name: 'CodeMaster42' },
+            player2: { name: 'AlgoNinja' },
+            spectatorCount: 12
+          },
+          {
+            _id: '2',
+            challengeTitle: 'Binary Tree Traversal',
+            battleType: 'premium',
+            player1: { name: 'DevGuru' },
+            player2: { name: 'LogicWizard' },
+            spectatorCount: 25
+          }
+        ]);
       }
     };
 
@@ -168,9 +191,28 @@ export default function EnhancedBattle({ userId, userName, isPremium }: Enhanced
     });
   };
 
-  const spectateeBattle = (battleId: string) => {
-    if (!socket) return;
-    socket.emit('spectate_battle', { battleId });
+  const spectateeBattle = async (battleId: string) => {
+    try {
+      const response = await fetch('/api/battles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'join_spectate',
+          battleId
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Navigate to spectate page
+        window.location.href = `/battle/${battleId}/spectate`;
+      } else {
+        console.error('Failed to join spectate:', result.error);
+      }
+    } catch (error) {
+      console.error('Error joining spectate:', error);
+    }
   };
 
   const handleCodeChange = (newCode: string) => {

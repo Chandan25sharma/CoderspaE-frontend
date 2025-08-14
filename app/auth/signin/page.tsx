@@ -42,12 +42,14 @@ export default function SignInPage() {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="flex items-center justify-center mb-6">
-            <Swords className="h-12 w-12 text-purple-400 mr-3" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              CoderspaE
-            </h1>
-          </div>
+         <div className="flex items-center justify-center mb-6">
+        <img 
+          src="/logo.png" 
+          alt="CoderspaE Logo" 
+          className="h-16 w-auto mr-3"
+         />
+         
+       </div>
           <h2 className="text-2xl font-bold text-white mb-2">
             {isSignUp ? 'Join the Battle Arena' : 'Welcome Back'}
           </h2>
@@ -65,7 +67,7 @@ export default function SignInPage() {
             onClick={() => setIsSignUp(false)}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               !isSignUp 
-                ? 'bg-purple-600 text-white' 
+                ? 'bg-blue-600 text-white' 
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -75,7 +77,7 @@ export default function SignInPage() {
             onClick={() => setIsSignUp(true)}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               isSignUp 
-                ? 'bg-purple-600 text-white' 
+                ? 'bg-blue-600 text-white' 
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -147,7 +149,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-white font-medium rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all disabled:opacity-50"
+              className="w-full flex justify-center py-3 px-4  text-white font-medium rounded-lg bg-gradient-to-r from-gray-600 to-black hover:from-black hover:to-gray-500 focus:outline-none transition-all disabled:opacity-50"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -172,7 +174,7 @@ export default function SignInPage() {
           {/* OAuth Providers */}
           <button
             onClick={() => signIn('google', { callbackUrl: '/' })}
-            className="group relative w-full flex justify-center py-3 px-4 border border-purple-500/30 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+            className="group relative w-full flex justify-center py-3 px-4 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
               <svg className="h-5 w-5 text-white" viewBox="0 0 24 24">
@@ -188,7 +190,7 @@ export default function SignInPage() {
           {/* GitHub Sign In */}
           <button
             onClick={() => signIn('github', { callbackUrl: '/' })}
-            className="group relative w-full flex justify-center py-3 px-4 border border-purple-500/30 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+            className="group relative w-full flex justify-center py-3 px-4 text-white font-medium rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
               <Github className="h-5 w-5 text-white" />
@@ -199,24 +201,24 @@ export default function SignInPage() {
 
         {/* Features */}
         <div className="mt-8">
-          <div className="text-center text-sm text-gray-400 mb-4">
+          <div className="text-center justify-centertext-sm text-gray-400 mb-4">
             Join thousands of developers and:
           </div>
           <div className="space-y-2 text-sm text-gray-300">
             <div className="flex items-center">
-              <ArrowRight className="h-4 w-4 text-purple-400 mr-2" />
+              <ArrowRight className="h-4 w-4 text-red-400 mr-2" />
               <span>Compete in real-time coding battles</span>
             </div>
             <div className="flex items-center">
-              <ArrowRight className="h-4 w-4 text-purple-400 mr-2" />
+              <ArrowRight className="h-4 w-4 text-red-400 mr-2" />
               <span>Climb the global leaderboard</span>
             </div>
             <div className="flex items-center">
-              <ArrowRight className="h-4 w-4 text-purple-400 mr-2" />
+              <ArrowRight className="h-4 w-4 text-red-400 mr-2" />
               <span>Practice with coding challenges</span>
             </div>
             <div className="flex items-center">
-              <ArrowRight className="h-4 w-4 text-purple-400 mr-2" />
+              <ArrowRight className="h-4 w-4 text-red-400 mr-2" />
               <span>Connect with developers worldwide</span>
             </div>
           </div>
@@ -226,11 +228,11 @@ export default function SignInPage() {
         <div className="text-center">
           <p className="text-xs text-gray-500">
             By signing in, you agree to our{' '}
-            <a href="/terms" className="text-purple-400 hover:text-purple-300">
+            <a href="/terms" className="text-white hover:text-red-300">
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="/privacy" className="text-purple-400 hover:text-purple-300">
+            <a href="/privacy" className="text-white hover:text-red-300">
               Privacy Policy
             </a>
           </p>

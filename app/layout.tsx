@@ -1,18 +1,10 @@
 'use client';
 
-import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
+// Use system fonts for better compatibility
+const fontClasses = "font-sans antialiased";
 
 export default function RootLayout({
   children,
@@ -29,9 +21,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#1e293b" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" 
+          rel="stylesheet" 
+        />
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 overflow-x-hidden`}
+        className="font-sans antialiased min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 overflow-x-hidden"
+        style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}
       >
         <Providers>
           <div className="relative flex flex-col min-h-screen">
@@ -98,20 +95,20 @@ export default function RootLayout({
           
           /* Custom scrollbar */
           ::-webkit-scrollbar {
-            width: 8px;
+            width: 4px;
           }
           
           ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.1);
+            background:white;
           }
           
           ::-webkit-scrollbar-thumb {
-            background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+            background: linear-gradient(to bottom, white);
             border-radius: 4px;
           }
           
           ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(to bottom, #2563eb, #7c3aed);
+            background: linear-gradient(to bottom, white);
           }
           
           /* Smooth focus states */

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get('difficulty');
     const category = searchParams.get('category');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '100');
 
     // Build filter
     interface FilterInterface {
@@ -31,69 +31,6 @@ export async function GET(request: NextRequest) {
       .skip((page - 1) * limit);
 
     const total = await Practice.countDocuments(filter);
-
-    // If no challenges in database, return some default ones
-    if (challenges.length === 0) {
-      const defaultChallenges = [
-        {
-          _id: 'default-1',
-          title: 'Two Sum Problem',
-          description: 'Given an array of integers and a target sum, return indices of two numbers that add up to the target.',
-          difficulty: 'Beginner',
-          category: 'Arrays',
-          timeLimit: 30,
-          tags: ['arrays', 'hash-map'],
-          xpReward: 50,
-          statistics: {
-            totalAttempts: 1250,
-            successRate: 78,
-            averageTime: 15
-          }
-        },
-        {
-          _id: 'default-2',
-          title: 'Binary Tree Traversal',
-          description: 'Implement inorder, preorder, and postorder traversal of a binary tree.',
-          difficulty: 'Intermediate',
-          category: 'Trees',
-          timeLimit: 45,
-          tags: ['trees', 'traversal', 'recursion'],
-          xpReward: 100,
-          statistics: {
-            totalAttempts: 890,
-            successRate: 65,
-            averageTime: 25
-          }
-        },
-        {
-          _id: 'default-3',
-          title: 'Dynamic Programming - Fibonacci',
-          description: 'Calculate the nth Fibonacci number using dynamic programming.',
-          difficulty: 'Beginner',
-          category: 'Dynamic Programming',
-          timeLimit: 20,
-          tags: ['dp', 'recursion', 'memoization'],
-          xpReward: 75,
-          statistics: {
-            totalAttempts: 2100,
-            successRate: 85,
-            averageTime: 10
-          }
-        }
-      ];
-
-      return NextResponse.json({
-        success: true,
-        challenges: defaultChallenges,
-        total: defaultChallenges.length,
-        pagination: {
-          page,
-          limit,
-          total: defaultChallenges.length,
-          totalPages: 1
-        }
-      });
-    }
 
     return NextResponse.json({
       success: true,

@@ -7,11 +7,17 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   image?: string;
+  avatar?: string;
   role: 'user' | 'admin';
   battlesWon: number;
   battlesLost: number;
   totalBattles: number;
+  totalPoints: number;
+  totalWins: number;
+  totalLosses: number;
   rating: number;
+  rank?: number;
+  isOnline: boolean;
   preferredLanguage: string;
   joinedAt: Date;
   lastActive: Date;
@@ -59,6 +65,10 @@ const UserSchema = new Schema<IUser>({
     type: String,
     default: null,
   },
+  avatar: {
+    type: String,
+    default: null,
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -76,9 +86,29 @@ const UserSchema = new Schema<IUser>({
     type: Number,
     default: 0,
   },
+  totalPoints: {
+    type: Number,
+    default: 0,
+  },
+  totalWins: {
+    type: Number,
+    default: 0,
+  },
+  totalLosses: {
+    type: Number,
+    default: 0,
+  },
   rating: {
     type: Number,
     default: 1000,
+  },
+  rank: {
+    type: Number,
+    default: null,
+  },
+  isOnline: {
+    type: Boolean,
+    default: false,
   },
   preferredLanguage: {
     type: String,

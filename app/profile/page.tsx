@@ -51,6 +51,7 @@ interface UserProfile {
   joinedAt: string;
 }
 
+
 const ProfilePage = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -196,7 +197,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-gray-950">
       {/* Navigation Header */}
       <div className="container mx-auto px-4 py-4">
         <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white transition-colors group">
@@ -210,7 +211,7 @@ const ProfilePage = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 mb-8"
+          className="bg-gray-950 backdrop-blur-sm rounded-2xl p-8 mb-8"
         >
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
             {/* Avatar and Basic Info */}
@@ -267,7 +268,7 @@ const ProfilePage = () => {
                   <button
                     onClick={handleSaveProfile}
                     disabled={saving}
-                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     Save
@@ -427,11 +428,11 @@ const ProfilePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+            className="bg-gray-950 backdrop-blur-sm rounded-xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Current Level</h3>
-              <Star className="h-6 w-6 text-yellow-400" />
+              <Star className="h-6 w-6 text-white" />
             </div>
             <div className="text-3xl font-bold text-yellow-400 mb-2">LVL {user.stats.level}</div>
             <div className="text-sm text-gray-400 mb-3">
@@ -452,11 +453,11 @@ const ProfilePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+            className="bg-gray-950 backdrop-blur-sm rounded-xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Global Rank</h3>
-              <Trophy className="h-6 w-6 text-yellow-400" />
+              <Trophy className="h-6 w-6 text-white" />
             </div>
             <div className="text-3xl font-bold text-white mb-2">#{user.stats.rank}</div>
             <div className="text-sm text-gray-400">Top 99%</div>
@@ -467,11 +468,11 @@ const ProfilePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+            className="bg-gray-950 backdrop-blur-sm rounded-xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Battles Won</h3>
-              <Zap className="h-6 w-6 text-green-400" />
+              <Zap className="h-6 w-6 text-white" />
             </div>
             <div className="text-3xl font-bold text-green-400 mb-2">{user.stats.battlesWon}</div>
             <div className="text-sm text-gray-400">
@@ -484,13 +485,13 @@ const ProfilePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+            className="bg-gray-950 backdrop-blur-sm rounded-xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Challenges Solved</h3>
-              <Target className="h-6 w-6 text-purple-400" />
+              <Target className="h-6 w-6 text-white" />
             </div>
-            <div className="text-3xl font-bold text-purple-400 mb-2">{user.stats.totalChallengesCompleted}</div>
+            <div className="text-3xl font-bold text-green-400 mb-2">{user.stats.totalChallengesCompleted}</div>
             <div className="text-sm text-gray-400">
               {user.stats.averageAccuracy}% accuracy
             </div>
@@ -502,7 +503,7 @@ const ProfilePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6"
+          className="bg-gray-950 backdrop-blur-sm rounded-xl p-6"
         >
           <div className="flex items-center gap-3 mb-6">
             <Activity className="h-6 w-6 text-blue-400" />

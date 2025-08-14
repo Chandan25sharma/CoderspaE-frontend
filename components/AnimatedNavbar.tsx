@@ -8,7 +8,6 @@ import { useSession, signOut } from 'next-auth/react';
 import { 
   Trophy, 
   Users, 
-  Settings, 
   User,
   Menu,
   X,
@@ -16,17 +15,24 @@ import {
   Zap,
   Target,
   ChevronDown,
-  LogOut
+  LogOut,
+  MessageCircle
 } from 'lucide-react';
 
 interface NavbarProps {
   className?: string;
 }
 
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{className?: string}>;
+  hasDropdown?: boolean;
+}
+
 const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -35,19 +41,24 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { name: 'Battle', href: '/battle', icon: Zap, hasDropdown: true },
+  const navItems: NavItem[] = [
+    { name: 'Battle', href: '#', icon: Zap, hasDropdown: true },
+    { name: 'Challenges', href: '/challenges', icon: Target },
     { name: 'Tournament', href: '/tournament', icon: Trophy },
     { name: 'Practice', href: '/practice', icon: Target },
     { name: 'Teams', href: '/teams', icon: Users },
+    { name: 'Chat', href: '/community/chat', icon: MessageCircle },
     { name: 'Leaderboard', href: '/leaderboard', icon: Crown },
   ];
 
   const battleModes = [
-    { name: 'Quick Duel', href: '/battle/quick', description: '1v1 battles' },
-    { name: 'Team Clash', href: '/battle/team', description: 'Team battles' },
-    { name: 'Tournament', href: '/tournament', description: 'Competitive events' },
-    { name: 'Practice', href: '/practice', description: 'Skill training' },
+    { name: 'Live Battles', href: '/battle/live', description: 'Watch and join live coding battles' },
+    { name: 'Quick Dual (1v1)', href: '/battle/quick-dual', description: 'Fast-paced 1v1 coding battles' },
+    { name: 'Minimalist Mind', href: '/battle/minimalist-mind', description: 'Simple, clean coding challenges' },
+    { name: 'Mirror Arena', href: '/battle/mirror-arena', description: 'Same problem, different approaches' },
+    { name: 'Narrative Mode', href: '/battle/narrative-mode', description: 'Story-driven coding adventures' },
+    { name: 'Team Clash', href: '/battle/team-clash', description: 'Team vs team competitions' },
+    { name: 'Attack & Defend', href: '/battle/attack-defend', description: 'Offensive and defensive coding' },
   ];
 
   return (
@@ -83,7 +94,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                   className="object-contain"
                 />
               </motion.div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">
                 CoderspaE
               </span>
             </motion.div>
@@ -98,7 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Link href={item.href}>
+                  {item.hasDropdown ? (
                     <motion.div
                       className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors cursor-pointer py-2 px-3 rounded-lg hover:bg-white/10"
                       whileHover={{ scale: 1.05 }}
@@ -110,7 +121,21 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                         <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
                       )}
                     </motion.div>
-                  </Link>
+                  ) : (
+                    <Link href={item.href}>
+                      <motion.div
+                        className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors cursor-pointer py-2 px-3 rounded-lg hover:bg-white/10"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span className="font-medium">{item.name}</span>
+                        {item.hasDropdown && (
+                          <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
+                        )}
+                      </motion.div>
+                    </Link>
+                  )}
                 </motion.div>
 
                 {/* Dropdown for Battle */}
@@ -143,28 +168,28 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
             {session ? (
               <div className="relative">
                <div className="flex items-center space-x-3">
-  {/* Profile Icon */}
-  <Link href="/profile">
-    <motion.div
-      className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center hover:scale-110 transition"
-      whileTap={{ scale: 0.95 }}
-    >
-      <User className="w-5 h-5 text-white" />
-    </motion.div>
-  </Link>
+              {/* Profile Icon */}
+              <Link href="/profile">
+              <motion.div
+             className="w-10 h-10 bg-gradient-to-br from-white to-gray-950 rounded-full flex items-center justify-center hover:scale-110 transition"
+             whileTap={{ scale: 0.95 }}
+             >
+            <User className="w-5 h-5 text-white" />
+            </motion.div>
+           </Link>
 
-  {/* Logout Button */}
-  <motion.button
-    onClick={() => signOut()}
-    className="w-10 h-10 bg-white/10 hover:bg-red-500/20 rounded-xl flex items-center justify-center transition"
-    whileHover={{ scale: 1.1 }}
-    whileTap={{ scale: 0.95 }}
-  >
-    <LogOut className="w-5 h-5 text-red-400" />
-  </motion.button>
-</div>
+            {/* Logout Button */}
+            <motion.button
+             onClick={() => signOut()}
+             className="w-5 h-0 bg-white/10 hover:bg-red-500/20  flex items-center justify-center transition"
+             whileHover={{ scale: 1.1 }}
+             whileTap={{ scale: 0.95 }}
+            >
+            <LogOut className="w-5 h-5 text-red-400" />
+             </motion.button>
+            </div>
 
-              </div>
+           </div>
             ) : (
               <div className="flex items-center space-x-3">
                 
@@ -209,12 +234,31 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Link href={item.href}>
-                      <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
-                        <item.icon className="w-5 h-5 text-gray-400" />
-                        <span className="text-white font-medium">{item.name}</span>
+                    {item.hasDropdown ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3 p-3 rounded-lg text-white">
+                          <item.icon className="w-5 h-5 text-gray-400" />
+                          <span className="font-medium">{item.name}</span>
+                        </div>
+                        <div className="pl-6 space-y-1">
+                          {battleModes.map((mode) => (
+                            <Link key={mode.name} href={mode.href}>
+                              <div className="flex flex-col p-2 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
+                                <span className="text-white text-sm">{mode.name}</span>
+                                <span className="text-gray-400 text-xs">{mode.description}</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </Link>
+                    ) : (
+                      <Link href={item.href}>
+                        <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
+                          <item.icon className="w-5 h-5 text-gray-400" />
+                          <span className="text-white font-medium">{item.name}</span>
+                        </div>
+                      </Link>
+                    )}
                   </motion.div>
                 ))}
               </div>

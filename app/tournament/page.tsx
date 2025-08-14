@@ -97,7 +97,7 @@ const TournamentPage = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner': return 'text-green-400 bg-green-400/10';
-      case 'intermediate': return 'text-yellow-400 bg-yellow-400/10';
+      case 'intermediate': return 'text-white-400 bg-white-400/10';
       case 'advanced': return 'text-orange-400 bg-orange-400/10';
       case 'expert': return 'text-red-400 bg-red-400/10';
       default: return 'text-gray-400 bg-gray-400/10';
@@ -108,7 +108,7 @@ const TournamentPage = () => {
     switch (status) {
       case 'registration': return 'text-blue-400 bg-blue-400/10';
       case 'active': return 'text-green-400 bg-green-400/10';
-      case 'upcoming': return 'text-yellow-400 bg-yellow-400/10';
+      case 'upcoming': return 'text-white-400 bg-white-400/10';
       case 'completed': return 'text-gray-400 bg-gray-400/10';
       default: return 'text-gray-400 bg-gray-400/10';
     }
@@ -156,7 +156,7 @@ const TournamentPage = () => {
               </p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4 px-6 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-950 transition-colors"
               >
                 Retry
               </button>
@@ -168,7 +168,7 @@ const TournamentPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-950 to-black">
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <motion.div
@@ -177,12 +177,13 @@ const TournamentPage = () => {
           className="text-center mb-12"
         >
           <div className="flex items-center justify-center mb-6">
-            <Trophy className="h-16 w-16 text-yellow-400 mr-4" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+            
+         
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-900 via-white to-gray-500 bg-clip-text text-transparent">
               Featured Tournaments
             </h1>
           </div>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-[14px] text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Compete against the world&apos;s best developers in high-stakes coding tournaments. 
             Win prizes, gain recognition, and prove your programming prowess.
           </p>
@@ -197,7 +198,7 @@ const TournamentPage = () => {
             className="mb-16"
           >
             <div className="flex items-center mb-8">
-              <Star className="h-8 w-8 text-yellow-400 mr-3" />
+              <Star className="h-8 w-8 text-blue-400 mr-3" />
               <h2 className="text-3xl font-bold text-white">Featured Tournaments</h2>
             </div>
             
@@ -210,18 +211,18 @@ const TournamentPage = () => {
                   transition={{ delay: index * 0.1 }}
                   className="relative"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur-xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 rounded-2xl blur-xl" />
                   <div className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300">
                     <div className="flex items-start justify-between mb-6">
                       <div>
-                        <div className="mb-3 inline-block px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full border border-yellow-500/30">
+                        <div className="mb-3 inline-block px-3 py-1 bg-white-500/20 text-white-400 text-xs font-bold rounded-full border border-white-500/30">
                           FEATURED
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">{tournament.name}</h3>
                         <p className="text-gray-300">{tournament.description}</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-yellow-400">{formatPrize(tournament.prizePool)}</div>
+                        <div className="text-3xl font-bold text-white-400">{formatPrize(tournament.prizePool)}</div>
                         <div className="text-sm text-gray-400">Prize Pool</div>
                       </div>
                     </div>
@@ -309,7 +310,7 @@ const TournamentPage = () => {
               </p>
               <button 
                 onClick={() => setActiveTab('featured')} 
-                className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="mt-6 px-6 py-3 bg-blue-900 hover:bg-blue-950 text-white rounded-lg transition-colors"
               >
                 View Featured Tournaments
               </button>
@@ -326,7 +327,7 @@ const TournamentPage = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-lg font-bold text-white">{tournament.name}</h3>
-                  {tournament.featured && <Star className="h-5 w-5 text-yellow-400" />}
+                  {tournament.featured && <Star className="h-5 w-5 text-white-400" />}
                 </div>
 
                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">{tournament.description}</p>
@@ -334,7 +335,7 @@ const TournamentPage = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Prize Pool</span>
-                    <span className="text-yellow-400 font-bold">{formatPrize(tournament.prizePool)}</span>
+                    <span className="text-white-400 font-bold">{formatPrize(tournament.prizePool)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Participants</span>

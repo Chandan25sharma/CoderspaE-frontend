@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Crown, Star, Zap, Trophy, Target, Flame, Shield } from 'lucide-react';
+import { Star, Zap, Trophy, Target, Flame, Shield } from 'lucide-react';
 
 interface BadgeProps {
   type: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';

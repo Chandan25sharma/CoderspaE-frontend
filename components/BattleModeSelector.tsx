@@ -8,7 +8,6 @@ import {
   Trophy, 
   Shield, 
   Target,
-  Eye,
   Brain,
   Layers,
   Code,
@@ -66,18 +65,6 @@ const battleModes: BattleMode[] = [
     players: 'Multi',
     timeLimit: '60 min',
     features: ['Multiple languages', 'Advanced algorithms', 'Tournament style']
-  },
-  {
-    id: 'live-viewer',
-    title: 'Live Viewer',
-    description: 'Watch and learn from top coders in real-time battles',
-    icon: Eye,
-    gradient: 'from-orange-500 to-red-600',
-    href: '/live-viewer',
-    difficulty: 'Easy',
-    players: 'Spectator',
-    timeLimit: 'Varies',
-    features: ['Watch live battles', 'Learn from pros', 'Chat with viewers']
   },
   {
     id: 'mirror-arena',
@@ -252,9 +239,9 @@ export default function BattleModeSelector() {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           {[
-            { label: 'Active Battles', value: '127', icon: Swords },
-            { label: 'Online Players', value: '2.3K', icon: Users },
-            { label: 'Total Matches', value: '45K', icon: Trophy },
+            { label: 'Active Battles', value: '...', icon: Swords },
+            { label: 'Online Coders', value: '...', icon: Users },
+            { label: 'Total Matches', value: '...', icon: Trophy },
             { label: 'Languages', value: '12+', icon: Code }
           ].map((stat, index) => (
             <div key={index} className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 text-center border border-gray-700/50">

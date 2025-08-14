@@ -29,7 +29,7 @@ function parseUserAgent(userAgent: string) {
   };
 }
 
-const handler = NextAuth({
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -135,7 +135,7 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile }: any) {
       await connectDB();
       
       let existingUser;
@@ -282,7 +282,7 @@ const handler = NextAuth({
       
       return true;
     },
-    async session({ session }) {
+    async session({ session }: any) {
       if (session.user?.email) {
         await connectDB();
         
@@ -312,7 +312,7 @@ const handler = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.role = user.role;
       }
@@ -323,9 +323,11 @@ const handler = NextAuth({
     signIn: '/auth/signin',
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
 
-export { handler as GET, handler as POST };
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST, authOptions };

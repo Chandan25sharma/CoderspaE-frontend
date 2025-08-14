@@ -99,7 +99,7 @@ const Chat: React.FC<ChatProps> = ({
         ) : (
           <div className="flex items-start gap-2">
             <div className="flex-shrink-0">
-              <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-6 h-6 bg-gradient-to-br from-purple-900 to-blue-900 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 {msg.user[0].toUpperCase()}
               </div>
             </div>

@@ -176,11 +176,11 @@ const cardVariants = {
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
-    case 'Easy': return 'text-green-400 bg-green-500/20';
-    case 'Medium': return 'text-yellow-400 bg-yellow-500/20';
-    case 'Hard': return 'text-orange-400 bg-orange-500/20';
-    case 'Expert': return 'text-red-400 bg-red-500/20';
-    default: return 'text-gray-400 bg-gray-500/20';
+    case 'Easy': return '';
+    case 'Medium': return '';
+    case 'Hard': return '';
+    case 'Expert': return '';
+    default: return '';
   }
 };
 
@@ -242,7 +242,7 @@ export default function DynamicBattleModes() {
           transition={{ duration: 0.8 }}
         >
           <motion.h1 
-            className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent mb-6"
+            className="text-6xl md:text-7xl font-bold bg-white bg-clip-text text-transparent mb-6"
             initial={{ scale: 0.5 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, type: "spring" }}
@@ -266,7 +266,7 @@ export default function DynamicBattleModes() {
           initial="hidden"
           animate="visible"
         >
-          {battleModes.map((mode, index) => (
+          {battleModes.map((mode,) => (
             <motion.div
               key={mode.id}
               variants={cardVariants}
@@ -277,24 +277,24 @@ export default function DynamicBattleModes() {
               onClick={() => handleModeSelect(mode.id)}
             >
               {/* Background Gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
-              
+              <div className={`absolute inset-0 bg-gray-900  duration-300`}></div>
+
               {/* Badges */}
               <div className="absolute top-4 right-4 flex gap-2">
                 {mode.isPopular && (
-                  <span className="px-2 py-1 bg-orange-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                  <span className="px-2 py-1  text-white text-xs rounded-full font-semibold flex items-center gap-1">
                     <Flame className="w-3 h-3" />
                     Popular
                   </span>
                 )}
                 {mode.isNew && (
-                  <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                  <span className="px-2 py-1 text-white text-xs rounded-full font-semibold flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
                     New
                   </span>
                 )}
                 {mode.isPremium && (
-                  <span className="px-2 py-1 bg-amber-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                  <span className="px-2 py-1  text-white text-xs rounded-full font-semibold flex items-center gap-1">
                     <Crown className="w-3 h-3" />
                     Premium
                   </span>
@@ -303,8 +303,8 @@ export default function DynamicBattleModes() {
 
               {/* Icon */}
               <motion.div 
-                className={`w-16 h-16 bg-gradient-to-br ${mode.color} rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
-                whileHover={{ rotate: 10 }}
+                className={`w-10 h-10 bg-gradient-to-br ${mode.color} rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
+                whileHover={{ rotate: 100 }}
               >
                 {mode.icon}
               </motion.div>
@@ -352,7 +352,7 @@ export default function DynamicBattleModes() {
 
                 {/* Action Button */}
                 <motion.button
-                  className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300"
+                  className="w-full mt-4 bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-300"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

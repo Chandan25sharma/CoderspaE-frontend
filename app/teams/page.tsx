@@ -14,6 +14,26 @@ import {
   Search
 } from 'lucide-react';
 
+interface ApiTeam {
+  id: string;
+  name: string;
+  description: string;
+  maxMembers: number;
+  memberCount: number;
+  myRole: string;
+  joinedAt: string;
+  stats?: {
+    battlesPlayed: number;
+    battlesWon: number;
+    tournamentWins: number;
+    totalXP: number;
+    averageRating: number;
+  };
+  tags?: string[];
+  isPublic: boolean;
+  avatar?: string;
+}
+
 interface TeamMember {
   id: string;
   name: string;
@@ -30,12 +50,26 @@ interface Team {
   name: string;
   description: string;
   maxMembers: number;
-  currentMembers: number;
-  leader: TeamMember;
-  members: TeamMember[];
-  location: string;
-  createdAt: string;
-  isPrivate: boolean;
+  memberCount?: number;  // From API
+  currentMembers?: number;  // For compatibility
+  myRole?: string;  // From API
+  joinedAt?: string;  // From API
+  stats?: {
+    battlesPlayed: number;
+    battlesWon: number;
+    tournamentWins: number;
+    totalXP: number;
+    averageRating: number;
+  };
+  tags?: string[];
+  isPublic?: boolean;  // From API
+  isPrivate?: boolean;  // For compatibility
+  avatar?: string;
+  // Legacy fields for mock data compatibility
+  leader?: TeamMember;
+  members?: TeamMember[];
+  location?: string;
+  createdAt?: string;
 }
 
 export default function TeamsPage() {
@@ -60,32 +94,75 @@ export default function TeamsPage() {
 
   const fetchTeams = async () => {
     try {
-      const mockTeams: Team[] = [
-        {
-          id: '1',
-          name: 'Code Warriors',
-          description: 'Competitive programming team focused on algorithms and data structures',
-          maxMembers: 4,
-          currentMembers: 3,
+      // Use search action to get all teams without the 20 team limit
+      const response = await fetch('/api/teams?action=search&query=&limit=100');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched teams:', data);
+        
+        // Transform API response to match expected interface
+        const transformedTeams: Team[] = (data.teams || []).map((apiTeam: ApiTeam) => ({
+          id: apiTeam.id,
+          name: apiTeam.name,
+          description: apiTeam.description,
+          maxMembers: apiTeam.maxMembers,
+          memberCount: apiTeam.memberCount,
+          currentMembers: apiTeam.memberCount, // Use memberCount as currentMembers
+          myRole: apiTeam.myRole,
+          joinedAt: apiTeam.joinedAt,
+          stats: apiTeam.stats,
+          tags: apiTeam.tags || [],
+          isPublic: apiTeam.isPublic,
+          isPrivate: !apiTeam.isPublic,
+          avatar: apiTeam.avatar,
+          // Create a mock leader for compatibility
           leader: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-            role: 'leader',
-            location: 'San Francisco, CA',
-            occupation: 'working',
-            institution: 'Google',
-            joinedAt: '2024-01-15'
+            id: 'leader-' + apiTeam.id,
+            name: 'Team Leader',
+            email: 'leader@example.com',
+            role: 'leader' as const,
+            location: 'Unknown',
+            occupation: 'working' as const,
+            institution: 'Unknown',
+            joinedAt: apiTeam.joinedAt || new Date().toISOString()
           },
-          members: [],
-          location: 'San Francisco, CA',
-          createdAt: '2024-01-15',
-          isPrivate: false
-        }
-      ];
-      setTeams(mockTeams);
+          members: [], // We'll populate this later if needed
+          location: 'Global',
+          createdAt: apiTeam.joinedAt || new Date().toISOString()
+        }));
+        
+        setTeams(transformedTeams);
+      } else {
+        console.error('Failed to fetch teams');
+        // Fallback to mock data for demo
+        const mockTeams: Team[] = [
+          {
+            id: '1',
+            name: 'Code Warriors',
+            description: 'Competitive programming team focused on algorithms and data structures',
+            maxMembers: 4,
+            currentMembers: 3,
+            leader: {
+              id: '1',
+              name: 'John Doe',
+              email: 'john@example.com',
+              role: 'leader',
+              location: 'San Francisco, CA',
+              occupation: 'working',
+              institution: 'Google',
+              joinedAt: '2024-01-15'
+            },
+            members: [],
+            location: 'San Francisco, CA',
+            createdAt: '2024-01-15',
+            isPrivate: false
+          }
+        ];
+        setTeams(mockTeams);
+      }
     } catch (error) {
       console.error('Failed to fetch teams:', error);
+      setTeams([]); // Set empty array on error
     }
   };
 
@@ -98,28 +175,43 @@ export default function TeamsPage() {
     }
 
     try {
-      const teamData = {
-        ...createForm,
-        leaderId: session.user?.email,
-        leaderName: session.user?.name,
-        leaderEmail: session.user?.email
-      };
-
-      console.log('Creating team:', teamData);
-      
-      setShowCreateModal(false);
-      setCreateForm({
-        name: '',
-        description: '',
-        maxMembers: 4,
-        location: '',
-        occupation: 'student',
-        institution: '',
-        isPrivate: false
+      const response = await fetch('/api/teams', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'create',
+          name: createForm.name,
+          description: createForm.description,
+          maxMembers: createForm.maxMembers,
+          isPublic: !createForm.isPrivate,
+          skillLevel: 'intermediate',
+          preferredLanguages: [],
+          tags: []
+        }),
       });
-      
-      fetchTeams();
-      alert('Team created successfully!');
+
+      if (response.ok) {
+        const newTeam = await response.json();
+        console.log('Team created:', newTeam);
+        setShowCreateModal(false);
+        setCreateForm({
+          name: '',
+          description: '',
+          maxMembers: 4,
+          location: '',
+          occupation: 'student',
+          institution: '',
+          isPrivate: false
+        });
+        fetchTeams();
+        alert('Team created successfully!');
+      } else {
+        const error = await response.json();
+        console.error('Team creation failed:', error);
+        alert(`Failed to create team: ${error.error || error.message || 'Unknown error'}`);
+      }
     } catch (error) {
       console.error('Failed to create team:', error);
       alert('Failed to create team. Please try again.');
@@ -150,7 +242,7 @@ export default function TeamsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <Users className="h-16 w-16 text-blue-400 mx-auto mb-6" />
+          <Users className="h-16 w-16 text-blue-900 mx-auto mb-6" />
           <h1 className="text-3xl font-bold text-white mb-4">Join Teams</h1>
           <p className="text-gray-300 mb-8">
             Sign in to create teams, join battles, and collaborate with fellow coders worldwide.
@@ -169,7 +261,7 @@ export default function TeamsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-950 to-black pt-20">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -178,8 +270,8 @@ export default function TeamsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center mb-6"
           >
-            <Users className="h-16 w-16 text-blue-400 mr-4" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 bg-clip-text text-transparent">
+            <Users className="h-16 w-16 text-blue-900 mr-4" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-800 via-white to--100 bg-clip-text text-transparent">
               Teams
             </h1>
           </motion.div>
@@ -197,12 +289,12 @@ export default function TeamsPage() {
               placeholder="Search teams..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-3 border border-gray-700 rounded-xl text-white placeholder-gray-400"
             />
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-900 to-black text-white rounded-xl hover:from-black hover:to-blue-900 transition-all"
           >
             <Plus className="w-5 h-5 mr-2" />
             Create Team
@@ -232,36 +324,36 @@ export default function TeamsPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex items-center text-gray-400 text-sm">
                   <Users className="w-4 h-4 mr-2" />
-                  <span>{team.currentMembers}/{team.maxMembers} members</span>
+                  <span>{team.currentMembers || team.memberCount || 0}/{team.maxMembers} members</span>
                 </div>
                 <div className="flex items-center text-gray-400 text-sm">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>{team.location}</span>
+                  <span>{team.location || 'Global'}</span>
                 </div>
                 <div className="flex items-center text-gray-400 text-sm">
-                  {team.leader.occupation === 'working' ? (
+                  {team.leader?.occupation === 'working' ? (
                     <Briefcase className="w-4 h-4 mr-2" />
                   ) : (
                     <GraduationCap className="w-4 h-4 mr-2" />
                   )}
-                  <span>{team.leader.institution}</span>
+                  <span>{team.leader?.institution || 'Unknown'}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="text-xs text-gray-500">
-                  Led by {team.leader.name}
+                  Led by {team.leader?.name || 'Team Leader'}
                 </div>
                 <button
                   onClick={() => handleJoinTeam(team.id)}
-                  disabled={team.currentMembers >= team.maxMembers}
+                  disabled={(team.currentMembers || team.memberCount || 0) >= team.maxMembers}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    team.currentMembers >= team.maxMembers
+                    (team.currentMembers || team.memberCount || 0) >= team.maxMembers
                       ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
                   }`}
                 >
-                  {team.currentMembers >= team.maxMembers ? 'Full' : 'Join Team'}
+                  {(team.currentMembers || team.memberCount || 0) >= team.maxMembers ? 'Full' : 'Join Team'}
                 </button>
               </div>
             </motion.div>

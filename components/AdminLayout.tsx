@@ -14,7 +14,6 @@ import {
   Settings,
   Activity,
   BarChart,
-  Plus,
   Search,
   Filter,
   Menu,

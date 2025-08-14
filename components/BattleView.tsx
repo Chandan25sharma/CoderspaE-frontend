@@ -50,7 +50,6 @@ const BattleView: React.FC<BattleViewProps> = ({
   players,
   currentPlayer,
   timeLeft,
-  totalTime,
   phase = 'waiting',
   spectatorCount = 0,
   problemTitle = 'Code Challenge',

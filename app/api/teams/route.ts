@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]/route';
 import { MongoClient, ObjectId, Db } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGODB_URI!);
@@ -63,7 +64,7 @@ interface TeamInvite {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -116,13 +117,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
+      console.log('No session or email found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { action, ...data } = await request.json();
+    console.log('Teams POST request:', { action, data, userEmail: session.user.email });
 
     await client.connect();
     const db = client.db('coderspae');
@@ -560,8 +563,11 @@ async function getTeamLeaderboard(db: Db) {
 }
 
 async function createTeam(db: Db, userId: ObjectId, teamData: any) {
+  console.log('Creating team with data:', { teamData, userId });
+  
   // Validate team data
   if (!teamData.name || teamData.name.length < 3) {
+    console.log('Team name validation failed:', teamData.name);
     return NextResponse.json({ error: 'Team name must be at least 3 characters' }, { status: 400 });
   }
 
