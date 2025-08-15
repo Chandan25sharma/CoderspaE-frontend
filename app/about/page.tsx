@@ -14,7 +14,7 @@ import {
   Star
 } from 'lucide-react';
 
-
+export default function AboutPage() {
   const values = [
     {
       icon: Code,
