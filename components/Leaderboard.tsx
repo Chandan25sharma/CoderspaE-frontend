@@ -9,7 +9,8 @@ import {
   TrendingUp,
   Zap,
   RefreshCw,
-  Search
+  Search,
+  Users
 } from 'lucide-react';
 
 interface LeaderboardUser {
@@ -33,12 +34,52 @@ interface LeaderboardUser {
   joinedDate: string;
 }
 
-interface LeaderboardProps {
-  className?: string;
+interface RankingData {
+  user: string;
+  username: string;
+  displayName?: string;
+  avatar?: string;
+  points: number;
+  wins: number;
+  losses: number;
+  battles: number;
+  battlesPlayed: number;
+  winRate: number;
+  level: number;
+  rating: number;
+  rank: number;
+  position?: number;
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
+interface LeaderboardTeam {
+  id: string;
+  _id?: string;
+  name: string;
+  tag?: string;
+  color?: string;
+  memberCount: number;
+  totalPoints?: number;
+  totalWins?: number;
+  winRate?: number;
+  members?: { id: string; username: string; name: string }[];
+  stats: {
+    totalXP: number;
+    battlesWon: number;
+    battlesPlayed: number;
+    averageRating: number;
+    winRate?: number;
+  };
+  tags: string[];
+}
+
+interface LeaderboardProps {
+  className?: string;
+  leaderboardType?: 'individual' | 'teams';
+}
+
+const Leaderboard: React.FC<LeaderboardProps> = ({ className = '', leaderboardType = 'individual' }) => {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
+  const [teams, setTeams] = useState<LeaderboardTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,30 +93,75 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
       if (refresh) setRefreshing(true);
       else setLoading(true);
 
-      const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
-      const response = await fetch(`/api/users?sortBy=${sortBy}&order=desc&page=${page}&limit=20${searchParam}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
-      }
+      if (leaderboardType === 'teams') {
+        // Fetch team leaderboard
+        const response = await fetch(`/api/teams?action=leaderboard&page=${page}&limit=20`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch team leaderboard');
+        }
 
-      const result = await response.json();
-      
-      if (result.success) {
-        setUsers(result.users || []);
-        setTotalPages(result.pagination?.total || 1);
-        setError(null);
+        const result = await response.json();
+        
+        if (result.success) {
+          setTeams(result.leaderboard || result.teams || result.data || []);
+          setTotalPages(result.pagination?.totalPages || 1);
+          setError(null);
+        } else {
+          throw new Error(result.error || 'Failed to fetch team leaderboard');
+        }
       } else {
-        throw new Error(result.error || 'Failed to fetch leaderboard');
+        // Fetch individual leaderboard
+        const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
+        const response = await fetch(`/api/leaderboard?type=global&limit=20&page=${page}${searchParam}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch leaderboard');
+        }
+
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          // Transform leaderboard data to user format
+          const transformedUsers = result.data.rankings?.map((ranking: RankingData, index: number) => ({
+            id: ranking.user || `user-${index}`,
+            username: ranking.username || `user${index}`,
+            name: ranking.displayName || ranking.username || `User ${index}`,
+            avatar: ranking.avatar || '',
+            totalPoints: ranking.points || 0,
+            totalWins: ranking.wins || 0,
+            totalLosses: ranking.battles - ranking.wins || 0,
+            winRate: ranking.winRate || 0,
+            rank: ranking.position || index + 1,
+            team: null,
+            isOnline: false,
+            isCurrentUser: false,
+            lastActive: new Date().toISOString(),
+            joinedDate: new Date().toISOString()
+          })) || [];
+          
+          setUsers(transformedUsers);
+          setTotalPages(Math.ceil((result.data.rankings?.length || 0) / 20));
+          setError(null);
+        } else {
+          throw new Error(result.error || 'Failed to fetch leaderboard');
+        }
       }
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
       setError(err instanceof Error ? err.message : 'Failed to load leaderboard');
+      
+      // Set fallback data to prevent empty state
+      if (leaderboardType === 'individual') {
+        setUsers([]);
+      } else {
+        setTeams([]);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [sortBy, page, searchQuery]);
+  }, [page, searchQuery, leaderboardType]);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -136,10 +222,17 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Trophy className="h-6 w-6 text-yellow-900" />
-          <h2 className="text-2xl font-bold text-white">Global Leaderboard</h2>
-          <div className="flex items-center gap-2 px-3 py-1  rounded-full">
-            <TrendingUp className="w-4 h-4 text-yellow-950" />
+          {leaderboardType === 'individual' ? (
+            <Trophy className="h-6 w-6 " />
+          ) : (
+            <Users className="h-6 w-6 " />
+          )}
+          <h2 className="text-2xl font-bold text-white">
+            {leaderboardType === 'individual' ? 'Individual Rankings' : 'Team Rankings'}
+          </h2>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full">
+            <TrendingUp className="w-4 h-4 text-green-400" />
+            <span className="text-green-400 text-sm">Live</span>
           </div>
         </div>
         
@@ -147,10 +240,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-950 hover:bg-gray-900 rounded-lg text-gray-300 text-sm transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg text-gray-300 text-sm transition-colors disabled:opacity-50"
           >
             {refreshing ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-800"></div>
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
@@ -168,7 +261,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
             placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-900 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
@@ -176,7 +269,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500"
+            className="bg-gray-900 border border-gray-900 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-blue-500"
           >
             <option value="totalPoints">Points</option>
             <option value="totalWins">Wins</option>
@@ -192,116 +285,200 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ className = '' }) => {
           <thead>
             <tr className="border-b border-gray-700">
               <th className="text-left py-3 px-4 text-gray-300 font-medium">Rank</th>
-              <th className="text-left py-3 px-4 text-gray-300 font-medium">User</th>
+              <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                {leaderboardType === 'individual' ? 'User' : 'Team'}
+              </th>
               <th className="text-center py-3 px-4 text-gray-300 font-medium">Points</th>
               <th className="text-center py-3 px-4 text-gray-300 font-medium">Wins</th>
-              <th className="text-center py-3 px-4 text-gray-300 font-medium">Losses</th>
+              <th className="text-center py-3 px-4 text-gray-300 font-medium">
+                {leaderboardType === 'individual' ? 'Losses' : 'Members'}
+              </th>
               <th className="text-center py-3 px-4 text-gray-300 font-medium">Win Rate</th>
-              <th className="text-center py-3 px-4 text-gray-300 font-medium">Team</th>
-              <th className="text-center py-3 px-4 text-gray-300 font-medium">Status</th>
+              {leaderboardType === 'individual' && (
+                <>
+                  <th className="text-center py-3 px-4 text-gray-300 font-medium">Team</th>
+                  <th className="text-center py-3 px-4 text-gray-300 font-medium">Status</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
-            {users.map((user, index) => (
-              <motion.tr
-                key={user.id}
-                className={`border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors ${
-                  user.isCurrentUser ? 'bg-blue-600/10 border-blue-500/30' : ''
-                } ${getRankBackground(user.rank)}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <td className="py-4 px-4">
-                  <div className="flex items-center justify-center w-12">
-                    {getRankIcon(user.rank)}
-                  </div>
-                </td>
-                
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">
-                          {user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      {user.isOnline && (
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
-                      )}
-                      {user.isCurrentUser && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">★</span>
+            {leaderboardType === 'individual' ? (
+              users.map((user, index) => (
+                <motion.tr
+                  key={user.id}
+                  className={`border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors ${
+                    user.isCurrentUser ? 'bg-blue-600/10 border-blue-500/30' : ''
+                  } ${getRankBackground(user.rank)}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <td className="py-4 px-4">
+                    <div className="flex items-center justify-center w-12">
+                      {getRankIcon(user.rank)}
+                    </div>
+                  </td>
+                  
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-10 h-10 bg-gray-950 rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">
+                            {user.username.charAt(0).toUpperCase()}
+                          </span>
                         </div>
-                      )}
+                        {user.isOnline && (
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                        )}
+                        {user.isCurrentUser && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs">★</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className={`font-medium ${user.isCurrentUser ? 'text-blue-400' : 'text-white'}`}>
+                          {user.username}
+                        </p>
+                        <p className="text-gray-400 text-sm">{user.name}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className={`font-medium ${user.isCurrentUser ? 'text-blue-400' : 'text-white'}`}>
-                        {user.username}
-                      </p>
-                      <p className="text-gray-400 text-sm">{user.name}</p>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Zap className="h-4 w-4 " />
+                      <span className="text-white font-bold">{user.totalPoints.toLocaleString()}</span>
                     </div>
-                  </div>
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <Zap className="h-4 w-4 text-yellow-400" />
-                    <span className="text-white font-bold">{user.totalPoints.toLocaleString()}</span>
-                  </div>
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  <span className="text-green-400 font-semibold">{user.totalWins}</span>
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  <span className="text-red-400 font-semibold">{user.totalLosses}</span>
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  <div className="flex items-center justify-center">
-                    <div className={`px-2 py-1 rounded text-sm font-medium ${
-                      user.winRate >= 70 ? 'bg-green-600/20 text-green-400' :
-                      user.winRate >= 50 ? 'bg-yellow-600/20 text-yellow-400' :
-                      'bg-red-600/20 text-red-400'
-                    }`}>
-                      {user.winRate}%
-                    </div>
-                  </div>
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  {user.team ? (
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-green-400 font-medium">{user.totalWins}</span>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-red-400 font-medium">{user.totalLosses}</span>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
                     <div className="flex items-center justify-center">
-                      <span
+                      <div className="w-16 bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full"
+                          style={{ width: `${Math.min(user.winRate, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="ml-2 text-white text-sm font-medium">
+                        {user.winRate.toFixed(1)}%
+                      </span>
+                    </div>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    {user.team ? (
+                      <span 
                         className="px-2 py-1 rounded text-xs font-medium"
                         style={{ backgroundColor: `${user.team.color}20`, color: user.team.color }}
                       >
                         {user.team.tag}
                       </span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500 text-sm">Solo</span>
-                  )}
-                </td>
-                
-                <td className="py-4 px-4 text-center">
-                  <div className="flex items-center justify-center">
-                    {user.isOnline ? (
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-green-400 text-sm">Online</span>
-                      </div>
                     ) : (
-                      <span className="text-gray-500 text-sm">Offline</span>
+                      <span className="text-gray-500 text-sm">-</span>
                     )}
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${user.isOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`}></div>
+                      <span className={`text-sm ${user.isOnline ? 'text-green-400' : 'text-gray-500'}`}>
+                        {user.isOnline ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            ) : (
+              teams.map((team, index) => (
+                <motion.tr
+                  key={team.id || team._id || index}
+                  className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <td className="py-4 px-4">
+                    <div className="flex items-center justify-center w-12">
+                      {getRankIcon(index + 1)}
+                    </div>
+                  </td>
+                  
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: team.color || '#6366f1' }}
+                      >
+                        <span className="text-white font-bold text-sm">
+                          {(team.tag || team.name || 'T').charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{team.name || `Team ${index + 1}`}</p>
+                        <p className="text-gray-400 text-sm">{team.tag || `TAG${index + 1}`}</p>
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Zap className="h-4 w-4 text-yellow-400" />
+                      <span className="text-white font-bold">{(team.stats?.totalXP || team.totalPoints || 0).toLocaleString()}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-green-400 font-medium">{team.stats?.battlesWon || team.totalWins || 0}</span>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <span className="text-blue-400 font-medium">{team.memberCount || team.members?.length || 0}</span>
+                  </td>
+                  
+                  <td className="py-4 px-4 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="w-16 bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-black-500 h-2 rounded-full"
+                          style={{ width: `${Math.min(team.stats?.winRate || team.winRate || 0, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="ml-2 text-white text-sm font-medium">
+                        {(team.stats?.winRate || team.winRate || 0).toFixed(1)}%
+                      </span>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+            )}
           </tbody>
         </table>
+        
+        {/* Empty State */}
+        {((leaderboardType === 'individual' && users.length === 0) || 
+          (leaderboardType === 'teams' && teams.length === 0)) && !loading && (
+          <div className="text-center py-12">
+            <Trophy className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 text-lg">
+              {leaderboardType === 'individual' ? 'No players found' : 'No teams found'}
+            </p>
+            <p className="text-gray-500 text-sm">
+              {leaderboardType === 'individual' 
+                ? 'Start battling to appear on the leaderboard!' 
+                : 'Create a team to compete in team rankings!'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Pagination */}

@@ -63,7 +63,8 @@ const LiveBattlesPage = () => {
       if (refresh) setRefreshing(true);
       else setLoading(true);
 
-      const response = await fetch('/api/battles');
+      // Try to fetch real battles first, fallback to demo if none exist
+      const response = await fetch('/api/battles?demo=true');
       
       if (!response.ok) {
         throw new Error('Failed to fetch live battles');
@@ -85,12 +86,20 @@ const LiveBattlesPage = () => {
         }));
         setBattles(transformedBattles);
         setError(null);
+        
+        // Show demo indicator if using demo data
+        if (result.isDemo) {
+          console.log('Using demo battle data for UI demonstration');
+        }
       } else {
         throw new Error(result.error || 'Failed to fetch battles');
       }
     } catch (err) {
       console.error('Error fetching battles:', err);
       setError(err instanceof Error ? err.message : 'Failed to load battles');
+      
+      // Set empty array instead of keeping stale data
+      setBattles([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -3,9 +3,17 @@
 import "./globals.css";
 import { Providers } from "./providers";
 import Head from 'next/head';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 
-// Use system fonts for better compatibility
-const fontClasses = "font-sans antialiased";
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+});
 
 export default function RootLayout({
   children,
@@ -60,14 +68,9 @@ export default function RootLayout({
         
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" 
-          rel="stylesheet" 
-        />
       </Head>
       <body
-        className="font-sans antialiased min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 overflow-x-hidden"
-        style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 overflow-x-hidden`}
       >
         <Providers>
           <div className="relative flex flex-col min-h-screen">

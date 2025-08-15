@@ -56,9 +56,25 @@ export async function GET(request: NextRequest) {
     // Battle mode specific stats
     let battleModeStats = null;
     if (battleMode && user.battleStats) {
-      battleModeStats = user.battleStats.find(
-        (stat: any) => stat.battleMode === battleMode
-      );
+      // Map battle mode names to schema properties
+      const battleModeMapping: { [key: string]: string } = {
+        'Quick Dual (1v1)': 'quickBattleStats',
+        'Quick Dual': 'quickBattleStats',
+        'Minimalist Mind': 'minimalistMindStats',
+        'Narrative Mode': 'narrativeModeStats',
+        'Mirror Arena': 'mirrorArenaStats',
+        'Team Clash': 'teamClashStats',
+        'Attack & Defend': 'attackDefendStats'
+      };
+      
+      const statsProp = battleModeMapping[battleMode];
+      if (statsProp && user.battleStats[statsProp]) {
+        battleModeStats = {
+          wins: user.battleStats[statsProp].won || 0,
+          totalBattles: user.battleStats[statsProp].played || 0,
+          points: user.battleStats[statsProp].points || 0
+        };
+      }
     }
 
     // Calculate trending (simplified logic)
@@ -68,10 +84,12 @@ export async function GET(request: NextRequest) {
     const stats = {
       rank: Math.min(rank, 999),
       totalWins: battleModeStats ? battleModeStats.wins : totalWins,
-      totalLosses: battleModeStats ? battleModeStats.losses : totalLosses,
+      totalLosses: battleModeStats ? 
+        (battleModeStats.totalBattles - battleModeStats.wins) : 
+        totalLosses,
       totalPoints: battleModeStats ? battleModeStats.points : totalPoints,
-      winRate: battleModeStats ? 
-        ((battleModeStats.wins / (battleModeStats.wins + battleModeStats.losses)) * 100) || 0 : 
+      winRate: battleModeStats && battleModeStats.totalBattles > 0 ? 
+        ((battleModeStats.wins / battleModeStats.totalBattles) * 100) : 
         winRate,
       recentGames: Math.floor(Math.random() * 10), // Mock recent games
       trending,

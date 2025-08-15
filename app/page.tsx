@@ -56,7 +56,7 @@ export default function HomePage() {
                   </h2>
                   <div className="text-lg text-gray-300 space-y-6 text-left">
                     <p>
-                      <strong className="text-white">CoderspaE</strong> is the world's premier international virtual code battle arena platform, 
+                      <strong className="text-white">CoderspaE</strong> is the world&apos;s premier international virtual code battle arena platform, 
                       designed to bring together programmers, developers, and coding enthusiasts from around the globe. 
                       Our mission is to create an engaging, competitive environment where coders can improve their skills, 
                       compete in real-time battles, and connect with a worldwide community of like-minded individuals.

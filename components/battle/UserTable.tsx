@@ -339,26 +339,26 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gray-900/50 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
+      <div className="bg-gray-950 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Users className="h-6 w-6 text-blue-400" />
             <h2 className="text-2xl font-bold text-white">
-              {showOnlineOnly ? 'Online Users' : 'All Users'}
+              {showOnlineOnly ? 'Online Users' : 'Users'}
             </h2>
-            <div className="flex items-center gap-2 px-3 py-1 bg-green-600/20 rounded-full">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full">
+              <div className="w-2 h-2"></div>
               <span className="text-green-400 text-sm font-medium">Live</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {/* User Filter Toggle */}
-            <div className="flex items-center gap-2 px-3 py-1 bg-gray-800/50 rounded-lg border border-gray-700/50">
+            <div className="flex items-center gap-1 px-3 py-1 bg-gray-950 rounded-lg border border-gray-700/50">
               <button
                 onClick={() => toggleUserFilter(true)}
                 className={`px-3 py-1 text-sm rounded transition-colors ${
                   showOnlineOnly
-                    ? 'bg-green-600/20 text-green-400 border border-green-500/30'
+                    ? 'bg-green-600/20 text-green-900 border border-green-500/30'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -366,9 +366,9 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
               </button>
               <button
                 onClick={() => toggleUserFilter(false)}
-                className={`px-3 py-1 text-sm rounded transition-colors ${
+                className={`px-1 py-1 text-sm rounded transition-colors ${
                   !showOnlineOnly
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                    ? 'bg-blue-800/20 text-blue-900 border border-blue-500/30'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -383,7 +383,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-blue-400 text-sm transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-blue-400 text-sm transition-colors disabled:opacity-50"
             >
               {refreshing ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
@@ -421,7 +421,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full  flex items-center justify-center">
                           {user.image ? (
                             <Image 
                               src={user.image} 
@@ -470,7 +470,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                   
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-yellow-400" />
+                      <Trophy className="h-4 w-4" />
                       <span className="text-white font-medium">{user.rating?.toLocaleString() || '1000'}</span>
                       <span className="text-gray-400 text-sm">rating</span>
                     </div>
@@ -486,18 +486,11 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                   <td className="py-4 px-4 text-right">
                     <div className="flex items-center gap-2 justify-end">
                       
-                      {/* Message Button */}
-                      <button
-                        onClick={() => openDirectMessage(user)}
-                        className="flex items-center gap-1 px-3 py-1 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-full text-green-400 text-xs transition-colors"
-                      >
-                        Message
-                      </button>
                       
                       {/* Challenge Button */}
                       <button
                         onClick={() => openChallengeModal(user)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-full text-blue-400 text-sm transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 border border-blue-500/30 rounded-full text-blue-400 text-sm transition-colors"
                       >
                         Challenge
                         <ChevronDown className="h-4 w-4" />
@@ -521,7 +514,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
           onClick={closeChallengeModal}
         >
           <motion.div
-            className="fixed right-0 top-0 h-full w-[480px] bg-gray-900 border-l border-gray-800 shadow-2xl overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-[580px] bg-gray-950 border-l border-gray-800 shadow-2xl overflow-y-auto"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -532,7 +525,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
               {/* Header */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full  flex items-center justify-center">
                     {selectedUser.image ? (
                       <Image 
                         src={selectedUser.image} 
@@ -561,23 +554,23 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
               </div>
               
               {/* User Stats */}
-              <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+              <div className="mb-6 p-4 bg-gray-950  ">
                 <h5 className="text-white font-medium mb-3">Player Stats</h5>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">{selectedUser.rating || 1000}</div>
+                    <div className="text-2xl font-bold">{selectedUser.rating || 1000}</div>
                     <div className="text-gray-400 text-sm">Rating</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-400">{selectedUser.battlesWon || 0}</div>
+                    <div className="text-2xl font-bold">{selectedUser.battlesWon || 0}</div>
                     <div className="text-gray-400 text-sm">Wins</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-400">{selectedUser.battlesLost || 0}</div>
+                    <div className="text-2xl font-bold text-white">{selectedUser.battlesLost || 0}</div>
                     <div className="text-gray-400 text-sm">Losses</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400">{selectedUser.totalBattles || 0}</div>
+                    <div className="text-2xl font-bold">{selectedUser.totalBattles || 0}</div>
                     <div className="text-gray-400 text-sm">Total</div>
                   </div>
                 </div>
@@ -596,7 +589,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 300)}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-900 rounded-lg text-white placeholder-gray-400 "
                   />
                   
                   {showDropdown && (
@@ -639,7 +632,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                           {searchTerm ? (
                             <div>
                               <p className="font-medium mb-1">
-                                No problems found for "{searchTerm}"
+                                No problems found for &quot;{searchTerm}&quot;
                               </p>
                               <p className="text-sm">
                                 Try different keywords
@@ -864,19 +857,6 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
         onClose={clearIncomingChallenge}
       />
 
-      {/* Direct Message Modal */}
-      {showDirectMessageModal && directMessageTarget && (
-        <DirectMessageModal
-          isOpen={showDirectMessageModal}
-          targetUser={{
-            id: directMessageTarget._id,
-            username: directMessageTarget.username,
-            name: directMessageTarget.name,
-            avatar: directMessageTarget.image
-          }}
-          onClose={closeDirectMessage}
-        />
-      )}
     </div>
   );
 };

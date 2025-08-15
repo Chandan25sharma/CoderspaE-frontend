@@ -285,7 +285,7 @@ const MessagesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
+    <div className="min-h-screen bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -297,17 +297,17 @@ const MessagesPage: React.FC = () => {
           <p className="text-gray-400">Connect with other coders and join community discussions</p>
         </motion.div>
 
-        <div className="flex h-[calc(100vh-200px)] bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-700">
+        <div className="flex h-[calc(100vh-200px)] bg-gray-950 rounded-2xl overflow-hidden border border-gray-900">
           {/* Sidebar */}
-          <div className="w-80 bg-gray-900/50 border-r border-gray-700 flex flex-col">
+          <div className="w-80 bg-gray-900/50 border-r border-gray-900 flex flex-col">
             {/* Tab Navigation */}
-            <div className="p-4 border-b border-gray-700">
-              <div className="flex bg-gray-800 rounded-lg p-1">
+            <div className="p-4 border-b border-gray-900">
+              <div className="flex bg-gray-900 rounded-lg p-1">
                 <button
                   onClick={() => setActiveTab('personal')}
                   className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
                     activeTab === 'personal'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-900 text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -318,7 +318,7 @@ const MessagesPage: React.FC = () => {
                   onClick={() => setActiveTab('community')}
                   className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
                     activeTab === 'community'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-9+00 text-white'
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -329,15 +329,15 @@ const MessagesPage: React.FC = () => {
             </div>
 
             {/* Search */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-3 border-b border-gray-900">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-100" />
                 <input
                   type="text"
                   placeholder={`Search ${activeTab === 'personal' ? 'chats' : 'rooms'}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-900 rounded-lg text-white placeholder-gray-400 "
                 />
               </div>
             </div>
@@ -436,7 +436,7 @@ const MessagesPage: React.FC = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-500 rounded-lg flex items-center justify-center">
                             <Hash className="w-5 h-5 text-white" />
                           </div>
                           

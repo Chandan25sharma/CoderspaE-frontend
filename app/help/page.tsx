@@ -143,7 +143,7 @@ export default function HelpPage() {
           <MessageCircle className="w-12 h-12 text-blue-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-4">Need More Help?</h2>
           <p className="text-gray-300 mb-6">
-            Can't find what you're looking for? Our support team is here to help!
+            Can&apos;t find what you&apos;re looking for? Our support team is here to help!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 

@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Target } from 'lucide-react';
 import Leaderboard from '@/components/Leaderboard';
 
 export default function LeaderboardPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'individual' | 'teams'>('individual');
 
   useEffect(() => {
     if (!session) {
@@ -56,12 +57,18 @@ export default function LeaderboardPage() {
             </motion.button>
             
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-950 to-orange-500 rounded-4xl flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Global Leaderboard</h1>
-                <p className="text-gray-400">Rankings of all CoderspaE warriors</p>
+                <h1 className="text-3xl font-bold text-white">
+                  {activeTab === 'individual' ? 'Leaderboard' : 'Team Rankings'}
+                </h1>
+                <p className="text-gray-400">
+                  {activeTab === 'individual' 
+                    ? 'Rankings of all CoderspaE warriors' 
+                    : 'Top performing teams worldwide'}
+                </p>
               </div>
             </div>
           </div>
@@ -72,13 +79,44 @@ export default function LeaderboardPage() {
           </div>
         </motion.div>
 
+        {/* Tab Navigation */}
+        <motion.div
+          className="flex items-center gap-2 mb-8 p-1 bg-gray-900/50 rounded-xl border border-gray-800"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <button
+            onClick={() => setActiveTab('individual')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all ${
+              activeTab === 'individual'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            <Trophy className="w-4 h-4" />
+            Individual Rankings
+          </button>
+          <button
+            onClick={() => setActiveTab('teams')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all ${
+              activeTab === 'teams'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Team Rankings
+          </button>
+        </motion.div>
+
         {/* Leaderboard */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Leaderboard />
+          <Leaderboard leaderboardType={activeTab} />
         </motion.div>
 
         {/* Footer Info */}
@@ -94,7 +132,7 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
             <span>• Global rankings</span>
             <span>• Real-time updates</span>
-            <span>• Team statistics</span>
+            <span>• {activeTab === 'individual' ? 'Player' : 'Team'} statistics</span>
             <span>• Win/Loss tracking</span>
           </div>
         </motion.div>
