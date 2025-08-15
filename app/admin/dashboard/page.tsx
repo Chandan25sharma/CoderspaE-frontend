@@ -1,7 +1,7 @@
 'use client';
 
 import AdminLayout from '@/components/AdminLayout';
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -35,7 +35,7 @@ interface RecentActivity {
 }
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats] = useState<DashboardStats>({
     totalUsers: 1247,
     activeUsers: 89,
     liveBattles: 12,
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     battleGrowth: 8.3
   });
 
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([
+  const [recentActivity] = useState<RecentActivity[]>([
     {
       id: '1',
       type: 'user_joined',

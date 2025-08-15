@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { 
   MessageCircle, 
   Send, 
@@ -13,8 +12,7 @@ import {
   Smile,
   X,
   Minimize2,
-  Maximize2,
-  ExternalLink
+  Maximize2
 } from 'lucide-react';
 
 interface Message {
@@ -45,7 +43,6 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
   position = 'bottom-right' 
 }) => {
   const { data: session } = useSession();
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [currentChannel, setCurrentChannel] = useState('general');
@@ -233,21 +230,6 @@ const ChatDropdown: React.FC<ChatDropdownProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {/* Navigation buttons */}
-                <button
-                  onClick={() => router.push('/messages')}
-                  className="text-gray-400 hover:text-white p-1 hover:bg-gray-700 rounded"
-                  title="Direct Messages"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => router.push('/community/chat')}
-                  className="text-gray-400 hover:text-white p-1 hover:bg-gray-700 rounded"
-                  title="Community Chat"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </button>
                 <button
                   onClick={() => setIsMinimized(!isMinimized)}
                   className="text-gray-400 hover:text-white p-1"

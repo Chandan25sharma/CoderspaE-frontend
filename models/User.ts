@@ -19,6 +19,7 @@ export interface IUser extends Document {
   rank?: number;
   isOnline: boolean;
   preferredLanguage: string;
+  battleModes: string[];
   joinedAt: Date;
   lastActive: Date;
   githubProfile?: {
@@ -113,6 +114,11 @@ const UserSchema = new Schema<IUser>({
   preferredLanguage: {
     type: String,
     default: 'en',
+  },
+  battleModes: {
+    type: [String],
+    default: ['minimalist-mind'],
+    enum: ['minimalist-mind', 'quick-battle', 'quick-dual', 'team-battle', 'tournament'],
   },
   joinedAt: {
     type: Date,

@@ -46,7 +46,7 @@ const AnimatedHero: React.FC<AnimatedHeroProps> = ({ onEnterBattle }) => {
         </motion.p>
 
         {/* CTA Buttons */}
-        <CTAButtons onEnterBattle={onEnterBattle} />
+    
 
         {/* Stats */}
         <StatsGrid />

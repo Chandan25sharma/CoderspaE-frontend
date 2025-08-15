@@ -23,9 +23,9 @@ const CTAButtons: React.FC<CTAButtonsProps> = ({ onEnterBattle }) => {
     if (onEnterBattle) {
       onEnterBattle();
     } else if (session) {
-      router.push('/battle');
+      router.push('/live');
     } else {
-      router.push('/auth/signup');
+      router.push('/auth/signin');
     }
   };
 

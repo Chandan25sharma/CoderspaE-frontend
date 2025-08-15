@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { 
   ChevronDown, 
   Zap, 
@@ -12,16 +13,26 @@ import {
   Users, 
   Shield,
   Swords,
-  MonitorPlay
+  MonitorPlay,
+  Crown,
+  Flame
 } from 'lucide-react';
 
 interface BattleDropdownProps {
   className?: string;
 }
 
+interface BattleModeStats {
+  activeBattles: number;
+  onlineUsers: number;
+  isPopular?: boolean;
+}
+
 const BattleDropdown: React.FC<BattleDropdownProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [modeStats, setModeStats] = useState<Record<string, BattleModeStats>>({});
   const router = useRouter();
+  const { data: session } = useSession();
 
   const battleModes = [
     {

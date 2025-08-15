@@ -20,22 +20,19 @@ interface LiveBattle {
   id: string;
   battleMode?: string;
   participants: Array<{
-    id: string;
     username: string;
-    avatar: string;
-    score: number;
-    progress: number;
+    status: string;
   }>;
   problem: {
-    id: string;
+    id?: string;
     title: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
-  };
+  } | string;
   startTime: string;
-  duration: number;
+  duration: number | string;
   spectators: number;
-  status: 'live' | 'starting' | 'finished';
-  timeRemaining: number;
+  status: 'live' | 'starting' | 'finished' | 'in_progress';
+  timeRemaining?: number;
 }
 
 const LiveBattlesPage = () => {
@@ -75,7 +72,18 @@ const LiveBattlesPage = () => {
       const result = await response.json();
       
       if (result.success) {
-        setBattles(result.data);
+        // Transform the data to match our interface
+        const transformedBattles = result.data.map((battle: any) => ({
+          ...battle,
+          problem: typeof battle.problem === 'string' 
+            ? { title: battle.problem, difficulty: battle.difficulty }
+            : battle.problem,
+          status: battle.status === 'in_progress' ? 'live' : battle.status,
+          timeRemaining: battle.status === 'in_progress' || battle.status === 'live' 
+            ? Math.max(0, 900 - Math.floor((Date.now() - new Date(battle.startTime).getTime()) / 1000))
+            : 0
+        }));
+        setBattles(transformedBattles);
         setError(null);
       } else {
         throw new Error(result.error || 'Failed to fetch battles');
@@ -294,86 +302,120 @@ const LiveBattlesPage = () => {
                   <p className="text-sm">Be the first to start a battle or check back later!</p>
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {filteredBattles.map((battle, index) => (
-                    <motion.div
-                      key={battle.id}
-                      className="bg-gray-900 backdrop-blur-sm rounded-xl p-6 hover:border-blue-500/30 transition-all"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(battle.status)}
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(battle.problem.difficulty)}`}>
-                              {battle.problem.difficulty}
-                            </span>
-                          </div>
-                          <div>
-                            <h3 className="text-white font-semibold text-lg">{battle.problem.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Users className="h-4 w-4" />
-                                {battle.participants.length} participants
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                {battle.spectators} watching
-                              </span>
-                              {battle.status === 'live' && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  {formatTimeRemaining(battle.timeRemaining)} left
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                <div className="space-y-8">
+                  {/* Battles organized by battle mode */}
+                  {battleModes.map((mode) => {
+                    const modeBattles = filteredBattles.filter(battle => 
+                      battleModeFilter === 'all' || battle.battleMode === mode
+                    );
+                    
+                    if (modeBattles.length === 0 && battleModeFilter !== 'all') return null;
+                    
+                    return (
+                      <div key={mode} className="space-y-4">
+                        <div className="flex items-center gap-3 border-b border-gray-700/50 pb-2">
+                          <Zap className="h-5 w-5 text-purple-400" />
+                          <h3 className="text-xl font-bold text-white">{mode}</h3>
+                          <span className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full text-xs">
+                            {modeBattles.length} active
+                          </span>
                         </div>
-
-                        <div className="flex items-center gap-3">
-                          {/* Participants Preview */}
-                          <div className="flex -space-x-2">
-                            {battle.participants.slice(0, 3).map((participant) => (
-                              <div
-                                key={participant.id}
-                                className="w-8 h-8 bg-gradient-to-br from-gray-950 to-white rounded-full border-2 border-gray-800 flex items-center justify-center text-xs font-bold text-white"
-                                title={participant.username}
+                        
+                        {modeBattles.length === 0 ? (
+                          <div className="text-center text-gray-500 py-8 border border-gray-800/30 rounded-xl bg-gray-900/20">
+                            <p className="text-sm">No active battles in {mode} mode</p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {modeBattles.map((battle, index) => (
+                              <motion.div
+                                key={battle.id}
+                                className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 hover:border-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-blue-500/20"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                whileHover={{ scale: 1.02 }}
                               >
-                                {participant.username.charAt(0).toUpperCase()}
-                              </div>
+                                {/* Battle Header */}
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-2">
+                                    {getStatusIcon(battle.status)}
+                                    <span className="text-white font-semibold text-sm uppercase tracking-wide">
+                                      {battle.status}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-gray-400 text-sm">
+                                    <Eye className="h-4 w-4" />
+                                    <span>{battle.spectators}</span>
+                                  </div>
+                                </div>
+
+                                {/* Problem Info */}
+                                <div className="mb-4">
+                                  <h4 className="text-white font-bold text-lg mb-2 line-clamp-1">
+                                    {typeof battle.problem === 'string' ? battle.problem : battle.problem.title}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(typeof battle.problem === 'string' ? 'Medium' : battle.problem.difficulty)}`}>
+                                      {typeof battle.problem === 'string' ? 'Medium' : battle.problem.difficulty}
+                                    </span>
+                                    {battle.status === 'live' && battle.timeRemaining && (
+                                      <span className="text-gray-300 text-sm">
+                                        ⏱️ {formatTimeRemaining(battle.timeRemaining)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Participants */}
+                                <div className="mb-6">
+                                  <p className="text-gray-400 text-sm mb-2">Participants ({battle.participants.length})</p>
+                                  <div className="flex -space-x-2">
+                                    {battle.participants.slice(0, 4).map((participant, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="relative w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 border-2 border-gray-800 flex items-center justify-center"
+                                        title={participant.username}
+                                      >
+                                        <span className="text-white text-xs font-bold">
+                                          {participant.username.charAt(0).toUpperCase()}
+                                        </span>
+                                      </div>
+                                    ))}
+                                    {battle.participants.length > 4 && (
+                                      <div className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-800 flex items-center justify-center">
+                                        <span className="text-gray-300 text-xs">+{battle.participants.length - 4}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleSpectate(battle.id)}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Watch
+                                  </button>
+                                  {battle.status === 'starting' && (
+                                    <button
+                                      onClick={() => handleJoinBattle(battle.id)}
+                                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                      <Play className="h-4 w-4" />
+                                      Join
+                                    </button>
+                                  )}
+                                </div>
+                              </motion.div>
                             ))}
-                            {battle.participants.length > 3 && (
-                              <div className="w-8 h-8 bg-gray-700 rounded-full border-2 border-gray-800 flex items-center justify-center text-xs text-gray-300">
-                                +{battle.participants.length - 3}
-                              </div>
-                            )}
                           </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleSpectate(battle.id)}
-                              className="flex items-center gap-2 px-4 py-2  hover:bg-red-600/30  rounded-3xl text-red-400 text-sm transition-colors"
-                            >
-                              <Eye className="h-4 w-4" />
-                              Spectate
-                            </button>
-                            {battle.status === 'starting' && (
-                              <button
-                                onClick={() => handleJoinBattle(battle.id)}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg text-green-400 text-sm transition-colors"
-                              >
-                                <Zap className="h-4 w-4" />
-                                Join
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

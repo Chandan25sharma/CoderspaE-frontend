@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useState } from 'react';
-import { Menu, X, Swords, Trophy, Users, LogOut, User, Shield, Target, Brain, Zap, Scroll } from 'lucide-react';
+import { Menu, X, Swords, Trophy, Users, LogOut, User, Shield, Target, Brain, Zap, Scroll, MessageCircle } from 'lucide-react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
 export function Navbar() {
@@ -15,6 +15,11 @@ export function Navbar() {
     { href: '/code-arena', icon: Zap, label: 'Code Arena', description: 'Power-up enhanced battles' },
     { href: '/attack-defend', icon: Shield, label: 'Attack & Defend', description: 'Break code vs test cases' },
     { href: '/narrative-mode', icon: Scroll, label: 'Narrative Mode', description: 'Story-driven challenges' },
+  ];
+
+  const messageModes = [
+    { href: '/messages', label: 'Personal Messages', description: 'Private 1-on-1 conversations and challenges' },
+    { href: '/community/chat', label: 'Community Chat', description: 'Join public chat rooms and discussions' },
   ];
 
   return (
@@ -71,6 +76,28 @@ export function Navbar() {
                 <Target className="h-4 w-4" />
                 <span>Practice</span>
               </Link>
+              
+              {/* Messages Dropdown */}
+              <div className="relative group">
+                <button className="text-gray-300 hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Messages</span>
+                </button>
+                <div className="absolute left-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="p-2 space-y-1">
+                    {messageModes.map((mode) => (
+                      <Link
+                        key={mode.href}
+                        href={mode.href}
+                        className="flex flex-col p-3 hover:bg-gray-800 rounded-md transition-colors"
+                      >
+                        <span className="text-white font-medium">{mode.label}</span>
+                        <span className="text-gray-400 text-sm">{mode.description}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
               <Link
                 href="/teams"
                 className="text-gray-300 hover:text-neon-purple px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
@@ -215,6 +242,18 @@ export function Navbar() {
             >
               Practice
             </Link>
+            
+            {/* Messages - Mobile */}
+            {messageModes.map((mode) => (
+              <Link
+                key={mode.href}
+                href={mode.href}
+                className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {mode.label}
+              </Link>
+            ))}
             <Link
               href="/teams"
               className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"

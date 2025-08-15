@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     if (search) {
       query.$or = [
         { username: { $regex: search, $options: 'i' } },
-        { displayName: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
       ];
     }
     
@@ -32,42 +33,20 @@ export async function GET(request: NextRequest) {
     
     // Get users with pagination
     const users = await User.find(query)
-      .select('username displayName avatar country bio totalPoints rank tier isOnline lastSeen battleStats')
-      .sort({ totalPoints: -1, rank: 1 })
+      .select('username name email image role battlesWon battlesLost totalBattles rating preferredLanguage githubProfile googleProfile totalCodeExecutions favoriteLanguages loginCount lastLoginIp isVerified joinedAt lastActive createdAt updatedAt')
+      .sort({ rating: -1, battlesWon: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
 
-    // Calculate stats for battle mode
+    // Process users for response
     const processedUsers = users.map(user => {
-      let modeStats = { played: 0, won: 0, points: 0 };
+      const winRate = user.totalBattles > 0 ? Math.round((user.battlesWon / user.totalBattles) * 100) : 0;
       
-      if (battleMode && user.battleStats) {
-        switch (battleMode) {
-          case 'quick-battle':
-            modeStats = user.battleStats.quickBattleStats || modeStats;
-            break;
-          case 'minimalist-mind':
-            modeStats = user.battleStats.minimalistMindStats || modeStats;
-            break;
-          case 'narrative-mode':
-            modeStats = user.battleStats.narrativeModeStats || modeStats;
-            break;
-          case 'team-clash':
-            modeStats = user.battleStats.teamClashStats || modeStats;
-            break;
-          case 'attack-defend':
-            modeStats = user.battleStats.attackDefendStats || modeStats;
-            break;
-          case '1v1-quick-dual':
-            modeStats = user.battleStats.quickDualStats || modeStats;
-            break;
-        }
-      }
-
       return {
         ...user,
-        modeStats
+        winRate,
+        isOnline: user.lastActive && new Date(user.lastActive) > new Date(Date.now() - 5 * 60 * 1000) // 5 minutes
       };
     });
 
@@ -83,8 +62,8 @@ export async function GET(request: NextRequest) {
       },
       stats: {
         totalUsers: total,
-        onlineUsers: await User.countDocuments({ isOnline: true }),
-        totalBattles: users.reduce((sum, user) => sum + (user.battleStats?.totalBattles || 0), 0)
+        onlineUsers: processedUsers.filter(user => user.isOnline).length,
+        totalBattles: users.reduce((sum, user) => sum + (user.totalBattles || 0), 0)
       }
     });
   } catch (error) {

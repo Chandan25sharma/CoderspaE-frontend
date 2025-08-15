@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import { Providers } from "./providers";
+import Head from 'next/head';
 
 // Use system fonts for better compatibility
 const fontClasses = "font-sans antialiased";
@@ -13,19 +14,57 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
+      <Head>
         <title>CoderspaE - International Virtual Code Battle Arena</title>
         <meta name="description" content="Compete in real-time coding battles with developers worldwide. Master algorithms, climb the leaderboard, and become the ultimate code warrior." />
         <meta name="keywords" content="coding, programming, battles, algorithms, competition, developers" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1e293b" />
+        
+        {/* Favicon and App Icons */}
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="shortcut icon" href="/icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content="CoderspaE - International Virtual Code Battle Arena" />
+        <meta property="og:description" content="Compete in real-time coding battles with developers worldwide. Master algorithms, climb the leaderboard, and become the ultimate code warrior." />
+        <meta property="og:image" content="/icon.png" />
+        <meta property="og:url" content="https://coderspae.vercel.app" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CoderspaE - International Virtual Code Battle Arena" />
+        <meta name="twitter:description" content="Compete in real-time coding battles with developers worldwide. Master algorithms, climb the leaderboard, and become the ultimate code warrior." />
+        <meta name="twitter:image" content="/icon.png" />
+        
+        {/* Structured Data for Search Engines */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "CoderspaE",
+              "url": "https://coderspae.vercel.app",
+              "description": "Compete in real-time coding battles with developers worldwide. Master algorithms, climb the leaderboard, and become the ultimate code warrior.",
+              "publisher": {
+                "@type": "Organization",
+                "name": "CoderspaE",
+                "logo": "https://coderspae.vercel.app/icon.png"
+              }
+            })
+          }}
+        />
+        
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap" 
           rel="stylesheet" 
         />
-      </head>
+      </Head>
       <body
         className="font-sans antialiased min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 overflow-x-hidden"
         style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}

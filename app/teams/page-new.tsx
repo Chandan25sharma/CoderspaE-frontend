@@ -8,9 +8,17 @@ import {
   Users, 
   Plus, 
   Crown, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap,
   Search,
+  Trophy,
+  Target,
+  Shield,
   Swords,
+  Calendar,
   Clock,
+  Star,
   UserPlus,
   Send
 } from 'lucide-react';
@@ -41,26 +49,6 @@ interface Team {
   createdAt: string;
 }
 
-interface ApiTeam {
-  id: string;
-  _id?: string;
-  name: string;
-  description: string;
-  avatar?: string;
-  memberCount: number;
-  maxMembers: number;
-  skillLevel: string;
-  preferredLanguages: string[];
-  stats: {
-    battlesPlayed: number;
-    battlesWon: number;
-    tournamentWins: number;
-    totalXP: number;
-    averageRating: number;
-  };
-  tags: string[];
-}
-
 interface TeamMember {
   id: string;
   name: string;
@@ -89,18 +77,68 @@ interface TeamChallenge {
   message: string;
 }
 
-interface DatabaseProblem {
-  _id: string;
-  title: string;
-  description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  categories: string[];
-  battleModes: string[];
-  tags: string[];
-  timeLimit: number;
-  isActive: boolean;
-  isApproved: boolean;
-}
+const mockTeams: Team[] = [
+  {
+    id: '1',
+    name: 'Code Warriors',
+    description: 'Elite team of competitive programmers specializing in algorithms and data structures',
+    maxMembers: 8,
+    currentMembers: 6,
+    leader: { id: '1', name: 'Alice Johnson', avatar: '/avatars/alice.png' },
+    members: [],
+    stats: {
+      battlesPlayed: 45,
+      battlesWon: 32,
+      winRate: 71.1,
+      totalPoints: 2850,
+      averageRating: 1650,
+      rank: 1
+    },
+    tags: ['Competitive', 'Algorithms', 'Advanced'],
+    isPublic: true,
+    createdAt: '2024-01-15'
+  },
+  {
+    id: '2',
+    name: 'Debug Dynasty',
+    description: 'Masters of debugging and problem-solving with a focus on clean code practices',
+    maxMembers: 6,
+    currentMembers: 5,
+    leader: { id: '2', name: 'Bob Smith', avatar: '/avatars/bob.png' },
+    members: [],
+    stats: {
+      battlesPlayed: 38,
+      battlesWon: 24,
+      winRate: 63.2,
+      totalPoints: 2340,
+      averageRating: 1520,
+      rank: 2
+    },
+    tags: ['Problem Solving', 'Clean Code', 'Debugging'],
+    isPublic: true,
+    createdAt: '2024-02-20'
+  },
+  {
+    id: '3',
+    name: 'Binary Beasts',
+    description: 'Focused on low-level programming and system optimization challenges',
+    maxMembers: 10,
+    currentMembers: 8,
+    leader: { id: '3', name: 'Carol Davis', avatar: '/avatars/carol.png' },
+    members: [],
+    stats: {
+      battlesPlayed: 42,
+      battlesWon: 25,
+      winRate: 59.5,
+      totalPoints: 2180,
+      averageRating: 1480,
+      rank: 3
+    },
+    tags: ['System Programming', 'Optimization', 'C++'],
+    isPublic: true,
+    createdAt: '2024-03-10'
+  }
+];
 
 const battleModes = [
   { id: 'quick-battle', name: 'Quick Battle', description: 'Fast-paced 30-minute team battles' },
@@ -109,13 +147,17 @@ const battleModes = [
   { id: 'team-clash', name: 'Team Clash', description: 'Full team collaboration battles' }
 ];
 
+const mockProblems = [
+  { id: '1', title: 'Two Sum Array', difficulty: 'Easy', timeLimit: 15 },
+  { id: '2', title: 'Binary Tree Traversal', difficulty: 'Medium', timeLimit: 30 },
+  { id: '3', title: 'Dynamic Programming Matrix', difficulty: 'Hard', timeLimit: 45 },
+  { id: '4', title: 'Graph Shortest Path', difficulty: 'Medium', timeLimit: 25 },
+  { id: '5', title: 'String Pattern Matching', difficulty: 'Easy', timeLimit: 20 }
+];
+
 export default function TeamsPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'myTeams'>('leaderboard');
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [problems, setProblems] = useState<DatabaseProblem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [problemsLoading, setProblemsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'leaderboard' | 'my-teams'>('leaderboard');
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,124 +170,11 @@ export default function TeamsPage() {
     message: ''
   });
 
-  // Fetch teams from the database
-  useEffect(() => {
-    const fetchTeams = async () => {
-      if (!session?.user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await fetch('/api/teams?action=search&query=&limit=100');
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Fetched teams from database:', data);
-          
-          if (data.success && data.teams) {
-            // Transform API response to match our interface
-            const transformedTeams: Team[] = data.teams.map((apiTeam: ApiTeam) => ({
-              id: apiTeam.id || apiTeam._id,
-              name: apiTeam.name,
-              description: apiTeam.description || 'No description available',
-              maxMembers: apiTeam.maxMembers || 10,
-              currentMembers: apiTeam.memberCount || 0,
-              leader: {
-                id: 'leader-' + (apiTeam.id || apiTeam._id),
-                name: 'Team Leader',
-                avatar: apiTeam.avatar
-              },
-              members: [],
-              stats: {
-                battlesPlayed: apiTeam.stats?.battlesPlayed || 0,
-                battlesWon: apiTeam.stats?.battlesWon || 0,
-                winRate: apiTeam.stats?.battlesPlayed > 0 
-                  ? Math.round((apiTeam.stats.battlesWon / apiTeam.stats.battlesPlayed) * 100) 
-                  : 0,
-                totalPoints: apiTeam.stats?.totalXP || 0,
-                averageRating: apiTeam.stats?.averageRating || 1200,
-                rank: 0 // Will be calculated below
-              },
-              tags: apiTeam.tags || [],
-              isPublic: true,
-              avatar: apiTeam.avatar,
-              createdAt: new Date().toISOString()
-            }));
-
-            // Sort by rating and assign ranks
-            transformedTeams.sort((a, b) => b.stats.averageRating - a.stats.averageRating);
-            transformedTeams.forEach((team, index) => {
-              team.stats.rank = index + 1;
-            });
-
-            setTeams(transformedTeams);
-          } else {
-            console.warn('No teams found or invalid response format');
-            setTeams([]);
-          }
-        } else {
-          console.error('Failed to fetch teams:', response.status);
-          setTeams([]);
-        }
-      } catch (error) {
-        console.error('Error fetching teams:', error);
-        setTeams([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeams();
-  }, [session?.user]);
-
-  const filteredTeams = teams.filter(team =>
+  const filteredTeams = mockTeams.filter(team =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     team.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     team.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  // Fetch problems from the database
-  const fetchProblems = async (battleMode?: string) => {
-    if (!session?.user) return;
-
-    try {
-      setProblemsLoading(true);
-      let url = '/api/problems?limit=20';
-      
-      // Add userId to filter by user's battle modes
-      if (session.user.id) {
-        url += `&userId=${session.user.id}`;
-      }
-      
-      if (battleMode) {
-        url += `&battleMode=${battleMode}`;
-      }
-      
-      const response = await fetch(url);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched problems from database:', data);
-        
-        if (data.success && data.problems) {
-          setProblems(data.problems);
-        } else {
-          console.warn('No problems found or invalid response format');
-          setProblems([]);
-        }
-      } else {
-        console.error('Failed to fetch problems:', response.status);
-        setProblems([]);
-      }
-    } catch (error) {
-      console.error('Error fetching problems:', error);
-      setProblems([]);
-    } finally {
-      setProblemsLoading(false);
-    }
-  };
 
   const handleChallengeTeam = (team: Team) => {
     setChallengeForm({
@@ -253,8 +182,6 @@ export default function TeamsPage() {
       challengedTeamId: team.id
     });
     setShowChallengeModal(true);
-    // Fetch problems when modal opens
-    fetchProblems();
   };
 
   const handleSendChallenge = () => {
@@ -273,47 +200,52 @@ export default function TeamsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-950 to-black">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Teams</h1>
-          <p className="text-gray-400">Join forces with fellow coders and compete as a team</p>
-        </div>
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Users className="w-8 h-8 text-blue-400" />
+            <h1 className="text-4xl font-bold text-white">Teams</h1>
+          </div>
+          <p className="text-gray-400">Join teams, compete together, and climb the leaderboards</p>
+        </motion.div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-6 mb-8">
-          <div className="flex bg-gray-800 rounded-xl p-1">
-            <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                activeTab === 'leaderboard'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Team Leaderboard
-            </button>
-            <button
-              onClick={() => setActiveTab('myTeams')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                activeTab === 'myTeams'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              My Teams
-            </button>
-          </div>
-          
-          <Link
-            href="/teams/create"
-            className="ml-auto flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors"
+        <motion.div
+          className="flex space-x-1 bg-gray-800/30 backdrop-blur-lg rounded-2xl p-2 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-medium transition-all ${
+              activeTab === 'leaderboard'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-white/10'
+            }`}
           >
-            <Plus className="w-5 h-5" />
-            Create Team
-          </Link>
-        </div>
+            <Trophy className="w-5 h-5" />
+            Team Leaderboard
+          </button>
+          <button
+            onClick={() => setActiveTab('my-teams')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-medium transition-all ${
+              activeTab === 'my-teams'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            Your Teams
+          </button>
+        </motion.div>
 
         {/* Content */}
         <AnimatePresence mode="wait">
@@ -341,19 +273,7 @@ export default function TeamsPage() {
 
               {/* Teams Leaderboard */}
               <div className="space-y-4">
-                {loading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Loading teams from database...</p>
-                  </div>
-                ) : filteredTeams.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">No teams found</p>
-                    <p className="text-gray-500 text-sm">Try adjusting your search or check back later</p>
-                  </div>
-                ) : (
-                  filteredTeams.map((team, index) => (
+                {filteredTeams.map((team, index) => (
                   <motion.div
                     key={team.id}
                     className="bg-gray-800/30 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-blue-500/30 transition-all cursor-pointer"
@@ -409,8 +329,7 @@ export default function TeamsPage() {
                       </div>
                     </div>
                   </motion.div>
-                  ))
-                )}
+                ))}
               </div>
             </motion.div>
           ) : (
@@ -578,11 +497,7 @@ export default function TeamsPage() {
                         {battleModes.map((mode) => (
                           <div
                             key={mode.id}
-                            onClick={() => {
-                              setChallengeForm({ ...challengeForm, battleMode: mode.id });
-                              // Fetch problems for selected battle mode
-                              fetchProblems(mode.id);
-                            }}
+                            onClick={() => setChallengeForm({ ...challengeForm, battleMode: mode.id })}
                             className={`p-4 rounded-xl cursor-pointer transition-all border ${
                               challengeForm.battleMode === mode.id
                                 ? 'border-blue-500 bg-blue-500/20'
@@ -602,40 +517,25 @@ export default function TeamsPage() {
                         Select Problems ({challengeForm.problems.length} selected)
                       </label>
                       <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {problemsLoading ? (
-                          <div className="text-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                            <p className="text-gray-400 text-sm">Loading problems...</p>
-                          </div>
-                        ) : problems.length === 0 ? (
-                          <div className="text-center py-4">
-                            <p className="text-gray-400 text-sm">No problems available for this battle mode</p>
-                          </div>
-                        ) : (
-                          problems.map((problem) => (
+                        {mockProblems.map((problem) => (
                           <div
-                            key={problem._id}
+                            key={problem.id}
                             onClick={() => {
-                              const isSelected = challengeForm.problems.some(p => p.id === problem._id);
+                              const isSelected = challengeForm.problems.some(p => p.id === problem.id);
                               if (isSelected) {
                                 setChallengeForm({
                                   ...challengeForm,
-                                  problems: challengeForm.problems.filter(p => p.id !== problem._id)
+                                  problems: challengeForm.problems.filter(p => p.id !== problem.id)
                                 });
                               } else {
                                 setChallengeForm({
                                   ...challengeForm,
-                                  problems: [...challengeForm.problems, {
-                                    id: problem._id,
-                                    title: problem.title,
-                                    difficulty: problem.difficulty,
-                                    timeLimit: problem.timeLimit
-                                  }]
+                                  problems: [...challengeForm.problems, problem]
                                 });
                               }
                             }}
                             className={`p-3 rounded-lg cursor-pointer transition-all border ${
-                              challengeForm.problems.some(p => p.id === problem._id)
+                              challengeForm.problems.some(p => p.id === problem.id)
                                 ? 'border-green-500 bg-green-500/20'
                                 : 'border-gray-600 hover:border-gray-500 bg-gray-700/50'
                             }`}
@@ -657,15 +557,14 @@ export default function TeamsPage() {
                                   </span>
                                 </div>
                               </div>
-                              {challengeForm.problems.some(p => p.id === problem._id) && (
+                              {challengeForm.problems.some(p => p.id === problem.id) && (
                                 <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                               )}
                             </div>
                           </div>
-                          ))
-                        )}
+                        ))}
                       </div>
                     </div>
 

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { 
   User, 
   Trophy, 
@@ -17,23 +18,50 @@ import ChallengeModal from '@/components/challenge/ChallengeModal';
 import { useSocket } from '@/hooks/useSocket';
 
 interface OnlineUser {
-  id: string;
+  _id: string;
   username: string;
   name: string;
-  avatar: string;
-  isOnline: boolean;
-  totalPoints: number;
-  totalWins: number;
-  totalLosses: number;
-  winRate: number;
-  rank: number;
-  team: {
+  email: string;
+  image?: string;
+  role: string;
+  battlesWon: number;
+  battlesLost: number;
+  totalBattles: number;
+  rating: number;
+  preferredLanguage: string;
+  githubProfile: {
+    id?: string;
+    username?: string;
+    profileUrl?: string;
+  };
+  googleProfile: {
+    id?: string;
+    profileUrl?: string;
+  };
+  totalCodeExecutions: number;
+  favoriteLanguages: string[];
+  loginCount: number;
+  lastLoginIp?: string;
+  isVerified: boolean;
+  joinedAt: string;
+  lastActive: string;
+  createdAt: string;
+  updatedAt: string;
+  // Legacy fields for compatibility
+  avatar?: string;
+  isOnline?: boolean;
+  totalPoints?: number;
+  rank?: number;
+  tier?: string;
+  country?: string;
+  bio?: string;
+  winRate?: number;
+  team?: {
     name: string;
     tag: string;
     color: string;
   } | null;
-  lastActive: string;
-  isCurrentUser: boolean;
+  isCurrentUser?: boolean;
 }
 
 interface Problem {
@@ -166,7 +194,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
     }
 
     // Send challenge via Socket.IO for real-time delivery
-    sendChallenge(selectedUser.id, [selectedProblem._id], selectedProblem.timeLimit || 30);
+    sendChallenge(selectedUser._id, [selectedProblem._id], selectedProblem.timeLimit || 30);
     
     // Close the modal and reset selection
     closeChallengeModal();
@@ -196,7 +224,7 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          challengedUserId: challengeSetup.user.id,
+          challengedUserId: challengeSetup.user._id,
           problemId: challengeSetup.problem._id,
           battleMode,
           scheduledDateTime: `${challengeSetup.scheduledDate}T${challengeSetup.scheduledTime}`,
@@ -224,14 +252,8 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
     }
   };
 
-  const joinSpectate = (targetUser: OnlineUser) => {
-    // Navigate to live streaming page for the user's battle
-    const battleModeSlug = battleMode.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-    router.push(`/battle/${battleModeSlug}/live?spectate=${targetUser.id}&user=${targetUser.username}`);
-  };
-
   const challengeUserFunction = (userId: string, problem?: Problem) => {
-    const user = users?.find((u: OnlineUser) => u.id === userId);
+    const user = users?.find((u: OnlineUser) => u._id === userId);
     if (user && problem) {
       setChallengeSetup({
         user,
@@ -241,13 +263,6 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
         scheduledDate: new Date().toISOString().split('T')[0] // Today's date
       });
       closeChallengeModal();
-    }
-  };
-
-  const spectateUserFunction = (userId: string) => {
-    const user = users?.find((u: OnlineUser) => u.id === userId);
-    if (user) {
-      joinSpectate(user);
     }
   };
 
@@ -389,16 +404,16 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
               <tr className="border-b border-gray-700">
                 <th className="text-left py-3 px-4 text-gray-300 font-medium">User</th>
                 <th className="text-left py-3 px-4 text-gray-300 font-medium">Status</th>
-                <th className="text-left py-3 px-4 text-gray-300 font-medium">Points</th>
-                <th className="text-left py-3 px-4 text-gray-300 font-medium">Rank</th>
+                <th className="text-left py-3 px-4 text-gray-300 font-medium">Rating</th>
+                <th className="text-left py-3 px-4 text-gray-300 font-medium">Battles</th>
                 <th className="text-right py-3 px-4 text-gray-300 font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
               {(users || []).map((user: OnlineUser, index: number) => (
                 <motion.tr
-                  key={user.id}
-                  className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
+                  key={user._id}
+                  className="border-b border-gray-900 hover:bg-gray-700/30 transition-colors"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -406,16 +421,27 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-10 h-10  flex items-center justify-center">
-                          <User className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                          {user.image ? (
+                            <Image 
+                              src={user.image} 
+                              alt={user.name} 
+                              width={40}
+                              height={40}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-5 h-5 text-white" />
+                          )}
                         </div>
                         {user.isOnline && (
                           <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
                         )}
                       </div>
                       <div>
-                        <p className="text-white font-medium">{user.username}</p>
-                        <p className="text-gray-400 text-sm">{user.name}</p>
+                        <p className="text-white font-medium">{user.name}</p>
+                        <p className="text-gray-400 text-sm">@{user.username}</p>
+
                         {user.team && (
                           <span
                             className="inline-block px-2 py-1 rounded text-xs font-medium mt-1"
@@ -429,33 +455,36 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
                   </td>
                   
                   <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-green-400 text-sm font-medium">Online</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${user.isOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`}></div>
+                        <span className={`text-sm font-medium ${user.isOnline ? 'text-green-400' : 'text-gray-400'}`}>
+                          {user.isOnline ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                      {user.isVerified && (
+                        <span className="text-blue-400 text-xs">✓ Verified</span>
+                      )}
                     </div>
                   </td>
                   
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2">
                       <Trophy className="h-4 w-4 text-yellow-400" />
-                      <span className="text-white font-medium">{user.totalPoints.toLocaleString()}</span>
-                      <span className="text-gray-400 text-sm">pts</span>
+                      <span className="text-white font-medium">{user.rating?.toLocaleString() || '1000'}</span>
+                      <span className="text-gray-400 text-sm">rating</span>
                     </div>
                   </td>
                   
                   <td className="py-4 px-4">
-                    <span className="text-white font-mono">#{user.rank}</span>
+                    <div className="flex flex-col">
+                      <span className="text-white font-medium">{user.battlesWon || 0}W / {user.battlesLost || 0}L</span>
+                      <span className="text-gray-400 text-xs">{user.totalBattles || 0} total</span>
+                    </div>
                   </td>
                   
                   <td className="py-4 px-4 text-right">
                     <div className="flex items-center gap-2 justify-end">
-                      {/* Watch Button */}
-                      <button
-                        onClick={() => joinSpectate(user)}
-                        className="flex items-center gap-1 px-3 py-1 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-full text-purple-400 text-xs transition-colors"
-                      >
-                        Watch
-                      </button>
                       
                       {/* Message Button */}
                       <button
@@ -482,152 +511,144 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
         </div>
       </div>
 
-      {/* Challenge Modal - Sales Person Selector Style */}
+      {/* Challenge Right Sidebar */}
       {showChallengeModal && selectedUser && (
         <motion.div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={closeChallengeModal}
         >
           <motion.div
-            className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden shadow-2xl"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            className="fixed right-0 top-0 h-full w-[480px] bg-gray-900 border-l border-gray-800 shadow-2xl overflow-y-auto"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h4 className="text-xl font-bold text-gray-800">⚔️ Challenge {selectedUser.username}</h4>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    {selectedUser.image ? (
+                      <Image 
+                        src={selectedUser.image} 
+                        alt={selectedUser.name} 
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-white">Challenge {selectedUser.username}</h4>
+                    <p className="text-gray-400 text-sm">{selectedUser.name}</p>
+                  </div>
+                </div>
                 <button
                   onClick={closeChallengeModal}
-                  className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                  className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-800"
                 >
-                  ✕
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
               
-              {/* Select Problem - Sales Person Selector Style */}
-              <div style={{ flex: 1, minWidth: 250, position: 'relative', marginBottom: 20 }}>
-                <label style={{ fontWeight: 'bold', marginBottom: 6, display: 'block', color: '#333' }}>
-                  Select Problem (Quick Battle Mode Only) - {problems.length} available
+              {/* User Stats */}
+              <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                <h5 className="text-white font-medium mb-3">Player Stats</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400">{selectedUser.rating || 1000}</div>
+                    <div className="text-gray-400 text-sm">Rating</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-400">{selectedUser.battlesWon || 0}</div>
+                    <div className="text-gray-400 text-sm">Wins</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-400">{selectedUser.battlesLost || 0}</div>
+                    <div className="text-gray-400 text-sm">Losses</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400">{selectedUser.totalBattles || 0}</div>
+                    <div className="text-gray-400 text-sm">Total</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Select Problem Form */}
+              <div className="mb-6">
+                <label className="block text-white font-medium mb-3">
+                  Select Problem
                 </label>
-                <div style={{ border: '1px solid #ccc', borderRadius: 6, background: '#fff', position: 'relative' }}>
+                <div className="relative">
                   <input
                     type="text"
-                    placeholder={`Search ${problems.length} problems by title, difficulty, or category...`}
+                    placeholder={`Search ${problems.length} problems...`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 300)}
-                    style={{
-                      width: '100%',
-                      padding: 12,
-                      border: 'none',
-                      outline: 'none',
-                      borderRadius: 6,
-                      fontSize: 14,
-                      backgroundColor: '#f9fafb'
-                    }}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   
                   {showDropdown && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      maxHeight: 400,
-                      overflowY: 'auto',
-                      border: '1px solid #ccc',
-                      background: '#fff',
-                      borderRadius: 6,
-                      marginTop: 2,
-                      zIndex: 1000,
-                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
-                    }}>
+                    <div className="absolute top-full left-0 right-0 mt-2 max-h-64 overflow-y-auto bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10">
                       {filteredProblems.length > 0 ? (
                         filteredProblems.map((problem) => (
                           <div
                             key={problem._id}
                             onMouseDown={() => handleProblemSelect(problem)}
-                            style={{
-                              padding: 15,
-                              cursor: 'pointer',
-                              borderBottom: '1px solid #eee',
-                              backgroundColor: 'transparent',
-                              transition: 'background-color 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f8fafc';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            className="p-4 cursor-pointer border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors"
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <div style={{ flex: 1 }}>
-                                <p style={{ fontWeight: '600', color: '#1f2937', margin: 0, fontSize: 15, lineHeight: '1.4' }}>
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <p className="font-medium text-white text-sm">
                                   {problem.title}
                                 </p>
-                                <p style={{ color: '#6b7280', fontSize: 12, margin: '4px 0 8px 0', lineHeight: '1.3' }}>
-                                  {problem.description?.substring(0, 120)}...
+                                <p className="text-gray-400 text-xs mt-1 line-clamp-2">
+                                  {problem.description?.substring(0, 100)}...
                                 </p>
-                                <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
-                                  <span style={{
-                                    padding: '3px 8px',
-                                    borderRadius: 4,
-                                    fontSize: 11,
-                                    fontWeight: '600',
-                                    backgroundColor: problem.difficulty === 'Easy' ? '#dcfce7' : 
-                                                   problem.difficulty === 'Medium' ? '#fef3c7' : 
-                                                   problem.difficulty === 'Hard' ? '#fee2e2' : '#f3e8ff',
-                                    color: problem.difficulty === 'Easy' ? '#166534' : 
-                                           problem.difficulty === 'Medium' ? '#92400e' : 
-                                           problem.difficulty === 'Hard' ? '#991b1b' : '#7c3aed'
-                                  }}>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                    problem.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' : 
+                                    problem.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' : 
+                                    problem.difficulty === 'Hard' ? 'bg-red-500/20 text-red-400' : 
+                                    'bg-purple-500/20 text-purple-400'
+                                  }`}>
                                     {problem.difficulty}
                                   </span>
-                                  <span style={{ fontSize: 11, color: '#6b7280', fontWeight: '500' }}>
-                                    ⏱️ {problem.timeLimit || 30} minutes
+                                  <span className="text-gray-400 text-xs flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {problem.timeLimit || 30}m
                                   </span>
-                                  {problem.category && problem.category.length > 0 && (
-                                    <span style={{ fontSize: 11, color: '#059669', fontWeight: '500' }}>
-                                      📂 {problem.category[0]}
-                                    </span>
-                                  )}
                                 </div>
                               </div>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
+                        <div className="p-6 text-center text-gray-400">
                           {searchTerm ? (
                             <div>
-                              <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>
-                                No Quick Battle problems found for &ldquo;{searchTerm}&rdquo;
+                              <p className="font-medium mb-1">
+                                No problems found for "{searchTerm}"
                               </p>
-                              <p style={{ margin: 0, fontSize: 12 }}>
-                                Try searching with different keywords or browse all problems below
+                              <p className="text-sm">
+                                Try different keywords
                               </p>
                             </div>
                           ) : (
                             <div>
-                              <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>
-                                Loading Quick Battle problems...
-                              </p>
-                              <div style={{ 
-                                width: 20, 
-                                height: 20, 
-                                border: '2px solid #e5e7eb',
-                                borderTop: '2px solid #3b82f6',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite',
-                                margin: '0 auto'
-                              }}></div>
+                              <p className="font-medium mb-2">Loading problems...</p>
+                              <div className="w-6 h-6 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
                             </div>
                           )}
                         </div>
@@ -639,70 +660,111 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
 
               {/* Selected Problem Preview */}
               {selectedProblem && (
-                <div style={{ 
-                  marginBottom: 20, 
-                  padding: 12, 
-                  backgroundColor: '#f8fafc', 
-                  borderRadius: 6,
-                  border: '1px solid #e2e8f0'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontWeight: 'medium', color: '#333', margin: 0 }}>
-                        ✅ {selectedProblem.title}
+                <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <p className="font-medium text-white">
+                          {selectedProblem.title}
+                        </p>
+                      </div>
+                      <p className="text-gray-400 text-sm mb-3">
+                        {selectedProblem.description?.substring(0, 120)}...
                       </p>
-                      <p style={{ color: '#666', fontSize: 12, margin: '4px 0 0 0' }}>
-                        {selectedProblem.description?.substring(0, 80)}...
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          selectedProblem.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' : 
+                          selectedProblem.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' : 
+                          selectedProblem.difficulty === 'Hard' ? 'bg-red-500/20 text-red-400' : 
+                          'bg-purple-500/20 text-purple-400'
+                        }`}>
+                          {selectedProblem.difficulty}
+                        </span>
+                        <span className="text-blue-400 text-sm flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {selectedProblem.timeLimit || 30} minutes
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => setSelectedProblem(null)}
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        color: '#666', 
-                        cursor: 'pointer',
-                        fontSize: 16
-                      }}
+                      className="text-gray-400 hover:text-white p-1 rounded transition-colors"
                     >
-                      ✕
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
                 </div>
               )}
 
+              {/* Battle Mode Selection */}
+              <div className="mb-6">
+                <label className="block text-white font-medium mb-3">Battle Mode</label>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-medium">Quick Battle</p>
+                        <p className="text-gray-400 text-sm">Fast-paced coding challenge</p>
+                      </div>
+                      <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button
-                  onClick={closeChallengeModal}
-                  style={{
-                    padding: '10px 20px',
-                    border: '1px solid #ccc',
-                    borderRadius: 6,
-                    background: '#fff',
-                    color: '#666',
-                    cursor: 'pointer',
-                    fontSize: 14
-                  }}
-                >
-                  Cancel
-                </button>
+              <div className="space-y-3">
                 <button
                   onClick={sendChallengeViaSocket}
                   disabled={!selectedProblem}
-                  style={{
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: 6,
-                    background: selectedProblem ? '#3b82f6' : '#ccc',
-                    color: '#fff',
-                    cursor: selectedProblem ? 'pointer' : 'not-allowed',
-                    fontSize: 14,
-                    fontWeight: 'medium'
-                  }}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
+                    selectedProblem
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg'
+                      : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  }`}
                 >
-                  {isConnected ? 'Send Live Challenge' : 'Send Challenge (Offline)'}
+                  {isConnected ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      Send Live Challenge
+                    </span>
+                  ) : (
+                    'Send Challenge (Offline)'
+                  )}
                 </button>
+                
+                <button
+                  onClick={closeChallengeModal}
+                  className="w-full py-3 px-4 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="mt-6 pt-6 border-t border-gray-800">
+                <h6 className="text-gray-400 text-sm mb-3">Challenge Info</h6>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Battle Mode:</span>
+                    <span className="text-white">Quick Battle</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Time Limit:</span>
+                    <span className="text-white">{selectedProblem?.timeLimit || 30} minutes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Connection:</span>
+                    <span className={isConnected ? 'text-green-400' : 'text-red-400'}>
+                      {isConnected ? 'Live' : 'Offline'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -806,7 +868,12 @@ const UserTable: React.FC<UserTableProps> = ({ battleMode }) => {
       {showDirectMessageModal && directMessageTarget && (
         <DirectMessageModal
           isOpen={showDirectMessageModal}
-          targetUser={directMessageTarget}
+          targetUser={{
+            id: directMessageTarget._id,
+            username: directMessageTarget.username,
+            name: directMessageTarget.name,
+            avatar: directMessageTarget.image
+          }}
           onClose={closeDirectMessage}
         />
       )}

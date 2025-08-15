@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { 
-  Swords, Trophy, Zap, Clock, Users, Target, Brain, 
-  Code, Play, Pause, RotateCcw, Send, MessageSquare,
-  Award, TrendingUp, Activity, Eye, Lightbulb, Flame
+  Swords, Clock, Users,  Brain, 
+  Code, Play, MessageSquare,
+ Lightbulb, Flame
 } from 'lucide-react';
 import { CodeEditor } from '../../components/CodeEditor';
 import { Timer } from '../../components/Timer';

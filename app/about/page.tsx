@@ -14,15 +14,6 @@ import {
   Star
 } from 'lucide-react';
 
-export default function AboutPage() {
-  const teamMembers = [
-    {
-      name: 'Coming Soon',
-      role: 'Founder & CEO',
-      description: 'Meet our amazing team',
-      status: 'coming-soon'
-    }
-  ];
 
   const values = [
     {
@@ -95,7 +86,7 @@ export default function AboutPage() {
             </p>
           </div>
         </motion.section>
-
+      
         {/* Values Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}

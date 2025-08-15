@@ -47,10 +47,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
     { name: 'Tournament', href: '/tournament', icon: Trophy },
     { name: 'Practice', href: '/practice', icon: Target },
     { name: 'Teams', href: '/teams', icon: Users },
-    { name: 'Chat', href: '/community/chat', icon: MessageCircle },
+    { name: 'Messages', href: '#', icon: MessageCircle, hasDropdown: true },
     { name: 'Leaderboard', href: '/leaderboard', icon: Crown },
   ];
-
+  
+  const chatModes = [
+    { name: 'Personal Messages', href: '/messages', description: 'Private 1-on-1 conversations and challenges' },
+    { name: 'Community Chat', href: '/community/chat', description: 'Join public chat rooms and discussions' },
+  ];
   const battleModes = [
     { name: 'Live Battles', href: '/battle/live', description: 'Watch and join live coding battles' },
     { name: 'Quick Dual (1v1)', href: '/battle/quick-dual', description: 'Fast-paced 1v1 coding battles' },
@@ -94,14 +98,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                   className="object-contain"
                 />
               </motion.div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-black to-gray-700 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
                 CoderspaE
               </span>
             </motion.div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4">
             {navItems.map((item, index) => (
               <div key={item.name} className="relative group">
                 <motion.div
@@ -138,14 +142,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                   )}
                 </motion.div>
 
-                {/* Dropdown for Battle */}
+                {/* Dropdown for Battle and Messages */}
                 {item.hasDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-gray-800/95 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <div className="absolute top-full left-0 mt-1 w-60 bg-gray-800/95 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                     <div className="p-4">
                       <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
-                        Battle Modes
+                        {item.name === 'Battle' ? 'Battle Modes' : 'Message Options'}
                       </h3>
-                      {battleModes.map((mode) => (
+                      {(item.name === 'Battle' ? battleModes : chatModes).map((mode) => (
                         <Link key={mode.name} href={mode.href}>
                           <motion.div
                             className="flex flex-col p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-colors"
@@ -171,7 +175,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
               {/* Profile Icon */}
               <Link href="/profile">
               <motion.div
-             className="w-10 h-10 bg-gradient-to-br from-white to-gray-950 rounded-full flex items-center justify-center hover:scale-110 transition"
+             className="w-8 h-8 bg-gradient-to-br from-white to-gray-950 rounded-full flex items-center justify-center hover:scale-110 transition"
              whileTap={{ scale: 0.95 }}
              >
             <User className="w-5 h-5 text-white" />
@@ -193,9 +197,9 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
             ) : (
               <div className="flex items-center space-x-3">
                 
-                <Link href="/auth/signup">
+                <Link href="/auth/signin">
                   <motion.button
-                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-600 text-white font-medium rounded-xl hover:from-black- hover:to-black transition-all"
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -241,7 +245,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
                           <span className="font-medium">{item.name}</span>
                         </div>
                         <div className="pl-6 space-y-1">
-                          {battleModes.map((mode) => (
+                          {(item.name === 'Battle' ? battleModes : chatModes).map((mode) => (
                             <Link key={mode.name} href={mode.href}>
                               <div className="flex flex-col p-2 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
                                 <span className="text-white text-sm">{mode.name}</span>

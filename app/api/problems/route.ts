@@ -10,12 +10,40 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const difficulty = searchParams.get('difficulty');
     const battleMode = searchParams.get('battleMode');
+    const userId = searchParams.get('userId');
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
     // Build query
     const query: any = { isActive: true, isApproved: true };
+    
+    // If userId is provided, filter by user's battle modes
+    if (userId && !battleMode) {
+      try {
+        const { User } = await import('@/models/DatabaseSchemas');
+        const user = await User.findById(userId).select('battleModes');
+        if (user && user.battleModes && user.battleModes.length > 0) {
+          // Map user battle modes to problem categories
+          const battleModeMapping: { [key: string]: string } = {
+            'minimalist-mind': 'Minimalist Mind',
+            'quick-battle': 'Quick Dual (1v1)',
+            'quick-dual': 'Quick Dual (1v1)',
+            'team-battle': 'Team Clash',
+            'tournament': 'Tournament Mode'
+          };
+          
+          const userCategories = user.battleModes.map((mode: string) => 
+            battleModeMapping[mode] || mode
+          );
+          
+          query.categories = { $in: userCategories };
+        }
+      } catch (userError) {
+        console.error('Error fetching user battle modes:', userError);
+        // Continue without filtering if user fetch fails
+      }
+    }
     
     if (category && category !== 'all') {
       query.categories = { $in: [category] };
@@ -26,7 +54,17 @@ export async function GET(request: NextRequest) {
     }
     
     if (battleMode && battleMode !== 'all') {
-      query.battleModes = { $in: [battleMode] };
+      // Map battle mode to category
+      const battleModeMapping: { [key: string]: string } = {
+        'minimalist-mind': 'Minimalist Mind',
+        'quick-battle': 'Quick Dual (1v1)',
+        'quick-dual': 'Quick Dual (1v1)',
+        'team-battle': 'Team Clash',
+        'tournament': 'Tournament Mode'
+      };
+      
+      const categoryName = battleModeMapping[battleMode] || battleMode;
+      query.categories = { $in: [categoryName] };
     }
     
     if (search) {
